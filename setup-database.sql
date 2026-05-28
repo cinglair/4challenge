@@ -1,327 +1,142 @@
 -- ============================================
--- Script SQL para Popular Banco Supabase
--- 4challenge - Desafios Matemáticos
--- ============================================
--- Como usar:
--- 1. Abra o SQL Editor no Supabase Dashboard
--- 2. Cole este script completo
--- 3. Execute (Run)
+-- 4challenge — Setup completo do banco
+-- Supabase SQL Editor: cole e execute (Run)
 -- ============================================
 
--- Criar tabela de desafios diários
-CREATE TABLE IF NOT EXISTS desafio_diario (
-  id SERIAL PRIMARY KEY,
-  data DATE UNIQUE NOT NULL,
-  desafios JSONB NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- Drop completo
+DROP TABLE IF EXISTS tentativa_usuario CASCADE;
+DROP TABLE IF EXISTS desafio_diario CASCADE;
+
+-- ============================================
+-- Tabela principal: um registro por dificuldade/dia
+-- ============================================
+
+CREATE TABLE desafio_diario (
+  id          SERIAL PRIMARY KEY,
+  data        DATE    NOT NULL,
+  dificuldade TEXT    NOT NULL CHECK (dificuldade IN ('facil', 'medio', 'dificil')),
+  digito      INTEGER NOT NULL,
+  quantidade  INTEGER NOT NULL,
+  alvo        NUMERIC NOT NULL,
+  solucao     TEXT    NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (data, dificuldade)
 );
 
-CREATE INDEX IF NOT EXISTS idx_desafio_diario_data ON desafio_diario(data);
+CREATE INDEX idx_desafio_data_dif ON desafio_diario(data, dificuldade);
 
--- Criar tabela de tentativas (opcional)
-CREATE TABLE IF NOT EXISTS tentativa_usuario (
-  id SERIAL PRIMARY KEY,
-  user_id TEXT,
-  desafio_id INTEGER,
-  nivel INTEGER NOT NULL,
-  expressao TEXT NOT NULL,
-  sucesso BOOLEAN NOT NULL,
-  tempo_segundos INTEGER,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+-- ============================================
+-- Tabela de tentativas (opcional)
+-- ============================================
+
+CREATE TABLE tentativa_usuario (
+  id              SERIAL PRIMARY KEY,
+  user_id         TEXT,
+  data            DATE    NOT NULL,
+  dificuldade     TEXT    NOT NULL,
+  expressao       TEXT    NOT NULL,
+  sucesso         BOOLEAN NOT NULL,
+  tempo_segundos  INTEGER,
+  created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_tentativa_usuario_user_id ON tentativa_usuario(user_id);
-CREATE INDEX IF NOT EXISTS idx_tentativa_usuario_created_at ON tentativa_usuario(created_at DESC);
+CREATE INDEX idx_tentativa_user ON tentativa_usuario(user_id);
+CREATE INDEX idx_tentativa_data ON tentativa_usuario(created_at DESC);
 
 -- ============================================
--- Habilitar RLS (Row Level Security)
+-- Permissões (necessário em projetos recentes)
 -- ============================================
 
-ALTER TABLE desafio_diario ENABLE ROW LEVEL SECURITY;
+GRANT USAGE ON SCHEMA public TO anon;
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+GRANT SELECT            ON desafio_diario   TO anon;
+GRANT SELECT            ON desafio_diario   TO authenticated;
+GRANT SELECT, INSERT    ON tentativa_usuario TO anon;
+GRANT SELECT, INSERT    ON tentativa_usuario TO authenticated;
+
+-- ============================================
+-- RLS
+-- ============================================
+
+ALTER TABLE desafio_diario    ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tentativa_usuario ENABLE ROW LEVEL SECURITY;
 
--- Política: Todos podem ler desafios
-DROP POLICY IF EXISTS "Desafios são públicos" ON desafio_diario;
-CREATE POLICY "Desafios são públicos" 
-  ON desafio_diario FOR SELECT 
-  USING (true);
+DROP POLICY IF EXISTS "desafios_publicos"     ON desafio_diario;
+DROP POLICY IF EXISTS "tentativas_insert"     ON tentativa_usuario;
+DROP POLICY IF EXISTS "tentativas_select"     ON tentativa_usuario;
 
--- Política: Todos podem inserir tentativas
-DROP POLICY IF EXISTS "Qualquer um pode registrar tentativas" ON tentativa_usuario;
-CREATE POLICY "Qualquer um pode registrar tentativas" 
-  ON tentativa_usuario FOR INSERT 
-  WITH CHECK (true);
+CREATE POLICY "desafios_publicos"
+  ON desafio_diario FOR SELECT USING (true);
 
--- Política: Todos podem ver tentativas (ajuste conforme necessário)
-DROP POLICY IF EXISTS "Tentativas são públicas" ON tentativa_usuario;
-CREATE POLICY "Tentativas são públicas" 
-  ON tentativa_usuario FOR SELECT 
-  USING (true);
+CREATE POLICY "tentativas_insert"
+  ON tentativa_usuario FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "tentativas_select"
+  ON tentativa_usuario FOR SELECT USING (true);
 
 -- ============================================
--- Popular com dados de exemplo
+-- Seed: 10 dias de desafios
 -- ============================================
 
--- Inserir desafios para hoje
-INSERT INTO desafio_diario (data, desafios) VALUES 
-(CURRENT_DATE, '[
-  {
-    "nivel": 1,
-    "digito": 2,
-    "quantidade": 3,
-    "alvo": 6,
-    "solucao": "(2 + 2 + 2)",
-    "dificuldade": "facil"
-  },
-  {
-    "nivel": 2,
-    "digito": 3,
-    "quantidade": 3,
-    "alvo": 9,
-    "solucao": "(3 + 3 + 3)",
-    "dificuldade": "facil"
-  },
-  {
-    "nivel": 3,
-    "digito": 2,
-    "quantidade": 4,
-    "alvo": 20,
-    "solucao": "((2 + 2) * (2 + 2 + 2))",
-    "dificuldade": "medio"
-  },
-  {
-    "nivel": 4,
-    "digito": 3,
-    "quantidade": 4,
-    "alvo": 12,
-    "solucao": "(3 + 3 + 3 + 3)",
-    "dificuldade": "medio"
-  },
-  {
-    "nivel": 5,
-    "digito": 4,
-    "quantidade": 3,
-    "alvo": 16,
-    "solucao": "(4 + 4 + 4 + 4)",
-    "dificuldade": "dificil"
-  },
-  {
-    "nivel": 6,
-    "digito": 4,
-    "quantidade": 4,
-    "alvo": 24,
-    "solucao": "((4 + 4) * (4 - (4 / 4)))",
-    "dificuldade": "dificil"
-  },
-  {
-    "nivel": 7,
-    "digito": 5,
-    "quantidade": 4,
-    "alvo": 30,
-    "solucao": "((5 + 5) * (5 - (5 / 5)))",
-    "dificuldade": "dificil"
-  },
-  {
-    "nivel": 8,
-    "digito": 3,
-    "quantidade": 5,
-    "alvo": 33,
-    "solucao": "(33 + (3 - 3))",
-    "dificuldade": "muito-dificil"
-  },
-  {
-    "nivel": 9,
-    "digito": 4,
-    "quantidade": 5,
-    "alvo": 44,
-    "solucao": "(44 + (4 - 4))",
-    "dificuldade": "muito-dificil"
-  },
-  {
-    "nivel": 10,
-    "digito": 5,
-    "quantidade": 5,
-    "alvo": 55,
-    "solucao": "(55 + (5 - 5))",
-    "dificuldade": "mestre"
-  }
-]'::jsonb)
-ON CONFLICT (data) DO NOTHING;
+INSERT INTO desafio_diario (data, dificuldade, digito, quantidade, alvo, solucao) VALUES
 
--- Inserir desafios para amanhã
-INSERT INTO desafio_diario (data, desafios) VALUES 
-(CURRENT_DATE + INTERVAL '1 day', '[
-  {
-    "nivel": 1,
-    "digito": 2,
-    "quantidade": 3,
-    "alvo": 4,
-    "solucao": "(2 + 2 - 2)",
-    "dificuldade": "facil"
-  },
-  {
-    "nivel": 2,
-    "digito": 3,
-    "quantidade": 3,
-    "alvo": 6,
-    "solucao": "(3 + 3 - 3)",
-    "dificuldade": "facil"
-  },
-  {
-    "nivel": 3,
-    "digito": 2,
-    "quantidade": 4,
-    "alvo": 8,
-    "solucao": "(2 + 2 + 2 + 2)",
-    "dificuldade": "medio"
-  },
-  {
-    "nivel": 4,
-    "digito": 3,
-    "quantidade": 4,
-    "alvo": 18,
-    "solucao": "((3 + 3) * (3 + 3))",
-    "dificuldade": "medio"
-  },
-  {
-    "nivel": 5,
-    "digito": 4,
-    "quantidade": 3,
-    "alvo": 12,
-    "solucao": "(4 + 4 + 4)",
-    "dificuldade": "dificil"
-  },
-  {
-    "nivel": 6,
-    "digito": 4,
-    "quantidade": 4,
-    "alvo": 32,
-    "solucao": "((4 + 4) * (4 + 4))",
-    "dificuldade": "dificil"
-  },
-  {
-    "nivel": 7,
-    "digito": 5,
-    "quantidade": 4,
-    "alvo": 25,
-    "solucao": "(5 * 5 + 5 - 5)",
-    "dificuldade": "dificil"
-  },
-  {
-    "nivel": 8,
-    "digito": 3,
-    "quantidade": 5,
-    "alvo": 27,
-    "solucao": "(3 * 3 * 3 + 3 - 3)",
-    "dificuldade": "muito-dificil"
-  },
-  {
-    "nivel": 9,
-    "digito": 4,
-    "quantidade": 5,
-    "alvo": 64,
-    "solucao": "(4 * 4 * 4 + 4 - 4)",
-    "dificuldade": "muito-dificil"
-  },
-  {
-    "nivel": 10,
-    "digito": 5,
-    "quantidade": 5,
-    "alvo": 125,
-    "solucao": "(5 * 5 * 5 + 5 - 5)",
-    "dificuldade": "mestre"
-  }
-]'::jsonb)
-ON CONFLICT (data) DO NOTHING;
+-- Dia 0 (hoje)
+(CURRENT_DATE, 'facil',   2, 3, 6,   '(2 + 2 + 2)'),
+(CURRENT_DATE, 'medio',   4, 4, 16,  '(4 + 4 + 4 + 4)'),
+(CURRENT_DATE, 'dificil', 3, 5, 36,  '((3 + 3) * (3 + 3) + 3 - 3)'),
 
--- Inserir mais 7 dias de desafios
-INSERT INTO desafio_diario (data, desafios) VALUES 
-(CURRENT_DATE + INTERVAL '2 days', '[
-  {"nivel": 1, "digito": 2, "quantidade": 3, "alvo": 2, "solucao": "(2 + 2 - 2)", "dificuldade": "facil"},
-  {"nivel": 2, "digito": 3, "quantidade": 3, "alvo": 3, "solucao": "(3 + 3 - 3)", "dificuldade": "facil"},
-  {"nivel": 3, "digito": 2, "quantidade": 4, "alvo": 16, "solucao": "((2 + 2) * (2 + 2))", "dificuldade": "medio"},
-  {"nivel": 4, "digito": 3, "quantidade": 4, "alvo": 36, "solucao": "((3 + 3) * (3 + 3))", "dificuldade": "medio"},
-  {"nivel": 5, "digito": 4, "quantidade": 3, "alvo": 8, "solucao": "(4 + 4 - 4)", "dificuldade": "dificil"},
-  {"nivel": 6, "digito": 4, "quantidade": 4, "alvo": 16, "solucao": "(4 * 4 + 4 - 4)", "dificuldade": "dificil"},
-  {"nivel": 7, "digito": 5, "quantidade": 4, "alvo": 20, "solucao": "(5 * 5 - 5 + 5)", "dificuldade": "dificil"},
-  {"nivel": 8, "digito": 3, "quantidade": 5, "alvo": 30, "solucao": "((3 + 3) * (3 + 3 - 3))", "dificuldade": "muito-dificil"},
-  {"nivel": 9, "digito": 4, "quantidade": 5, "alvo": 48, "solucao": "((4 + 4) * (4 + 4 - 4))", "dificuldade": "muito-dificil"},
-  {"nivel": 10, "digito": 5, "quantidade": 5, "alvo": 100, "solucao": "((5 + 5) * (5 + 5 - 5))", "dificuldade": "mestre"}
-]'::jsonb),
-(CURRENT_DATE + INTERVAL '3 days', '[
-  {"nivel": 1, "digito": 2, "quantidade": 3, "alvo": 8, "solucao": "(2 * 2 * 2)", "dificuldade": "facil"},
-  {"nivel": 2, "digito": 3, "quantidade": 3, "alvo": 27, "solucao": "(3 * 3 * 3)", "dificuldade": "facil"},
-  {"nivel": 3, "digito": 2, "quantidade": 4, "alvo": 10, "solucao": "(2 + 2 + 2 + 2 + 2)", "dificuldade": "medio"},
-  {"nivel": 4, "digito": 3, "quantidade": 4, "alvo": 15, "solucao": "(3 + 3 + 3 + 3 + 3)", "dificuldade": "medio"},
-  {"nivel": 5, "digito": 4, "quantidade": 3, "alvo": 64, "solucao": "(4 * 4 * 4)", "dificuldade": "dificil"},
-  {"nivel": 6, "digito": 4, "quantidade": 4, "alvo": 20, "solucao": "(4 * 4 + 4 + 4)", "dificuldade": "dificil"},
-  {"nivel": 7, "digito": 5, "quantidade": 4, "alvo": 50, "solucao": "(5 * 5 + 5 * 5)", "dificuldade": "dificil"},
-  {"nivel": 8, "digito": 3, "quantidade": 5, "alvo": 36, "solucao": "((3 + 3) * (3 + 3))", "dificuldade": "muito-dificil"},
-  {"nivel": 9, "digito": 4, "quantidade": 5, "alvo": 80, "solucao": "((4 + 4) * (4 + 4 + 4))", "dificuldade": "muito-dificil"},
-  {"nivel": 10, "digito": 5, "quantidade": 5, "alvo": 150, "solucao": "((5 + 5 + 5) * (5 + 5))", "dificuldade": "mestre"}
-]'::jsonb),
-(CURRENT_DATE + INTERVAL '4 days', '[
-  {"nivel": 1, "digito": 2, "quantidade": 3, "alvo": 0, "solucao": "(2 - 2 - 2)", "dificuldade": "facil"},
-  {"nivel": 2, "digito": 3, "quantidade": 3, "alvo": 0, "solucao": "(3 - 3 - 3)", "dificuldade": "facil"},
-  {"nivel": 3, "digito": 2, "quantidade": 4, "alvo": 12, "solucao": "((2 + 2) * (2 + 2 - 1))", "dificuldade": "medio"},
-  {"nivel": 4, "digito": 3, "quantidade": 4, "alvo": 24, "solucao": "((3 + 3) * (3 + 3 - 2))", "dificuldade": "medio"},
-  {"nivel": 5, "digito": 4, "quantidade": 3, "alvo": 0, "solucao": "(4 - 4 - 4)", "dificuldade": "dificil"},
-  {"nivel": 6, "digito": 4, "quantidade": 4, "alvo": 28, "solucao": "(4 * 4 + 4 + 4 + 4)", "dificuldade": "dificil"},
-  {"nivel": 7, "digito": 5, "quantidade": 4, "alvo": 40, "solucao": "(5 * 5 + 5 + 5 + 5)", "dificuldade": "dificil"},
-  {"nivel": 8, "digito": 3, "quantidade": 5, "alvo": 45, "solucao": "((3 + 3 + 3) * (3 + 3 + 3))", "dificuldade": "muito-dificil"},
-  {"nivel": 9, "digito": 4, "quantidade": 5, "alvo": 96, "solucao": "((4 + 4 + 4) * (4 + 4 + 4))", "dificuldade": "muito-dificil"},
-  {"nivel": 10, "digito": 5, "quantidade": 5, "alvo": 225, "solucao": "((5 + 5 + 5) * (5 + 5 + 5))", "dificuldade": "mestre"}
-]'::jsonb),
-(CURRENT_DATE + INTERVAL '5 days', '[
-  {"nivel": 1, "digito": 2, "quantidade": 3, "alvo": 1, "solucao": "(2 / 2 / 2)", "dificuldade": "facil"},
-  {"nivel": 2, "digito": 3, "quantidade": 3, "alvo": 1, "solucao": "(3 / 3 / 3)", "dificuldade": "facil"},
-  {"nivel": 3, "digito": 2, "quantidade": 4, "alvo": 14, "solucao": "((2 + 2 + 2) * 2 + 2)", "dificuldade": "medio"},
-  {"nivel": 4, "digito": 3, "quantidade": 4, "alvo": 21, "solucao": "((3 + 3 + 3) * 3 - 6)", "dificuldade": "medio"},
-  {"nivel": 5, "digito": 4, "quantidade": 3, "alvo": 1, "solucao": "(4 / 4 / 4)", "dificuldade": "dificil"},
-  {"nivel": 6, "digito": 4, "quantidade": 4, "alvo": 40, "solucao": "((4 + 4 + 4 + 4) * 2.5)", "dificuldade": "dificil"},
-  {"nivel": 7, "digito": 5, "quantidade": 4, "alvo": 60, "solucao": "((5 + 5 + 5 + 5) * 3)", "dificuldade": "dificil"},
-  {"nivel": 8, "digito": 3, "quantidade": 5, "alvo": 54, "solucao": "((3 + 3) * (3 + 3 + 3))", "dificuldade": "muito-dificil"},
-  {"nivel": 9, "digito": 4, "quantidade": 5, "alvo": 112, "solucao": "((4 + 4 + 4 + 4) * 7)", "dificuldade": "muito-dificil"},
-  {"nivel": 10, "digito": 5, "quantidade": 5, "alvo": 250, "solucao": "((5 + 5) * (5 + 5 + 5 + 5 + 5))", "dificuldade": "mestre"}
-]'::jsonb),
-(CURRENT_DATE + INTERVAL '6 days', '[
-  {"nivel": 1, "digito": 2, "quantidade": 3, "alvo": 3, "solucao": "(2 + 2 / 2)", "dificuldade": "facil"},
-  {"nivel": 2, "digito": 3, "quantidade": 3, "alvo": 4, "solucao": "(3 + 3 / 3)", "dificuldade": "facil"},
-  {"nivel": 3, "digito": 2, "quantidade": 4, "alvo": 18, "solucao": "((2 + 2 + 2) * 2 + 6)", "dificuldade": "medio"},
-  {"nivel": 4, "digito": 3, "quantidade": 4, "alvo": 27, "solucao": "((3 + 3 + 3) * 3)", "dificuldade": "medio"},
-  {"nivel": 5, "digito": 4, "quantidade": 3, "alvo": 5, "solucao": "(4 + 4 / 4)", "dificuldade": "dificil"},
-  {"nivel": 6, "digito": 4, "quantidade": 4, "alvo": 36, "solucao": "((4 + 4 + 4) * 3)", "dificuldade": "dificil"},
-  {"nivel": 7, "digito": 5, "quantidade": 4, "alvo": 75, "solucao": "((5 + 5 + 5) * 5)", "dificuldade": "dificil"},
-  {"nivel": 8, "digito": 3, "quantidade": 5, "alvo": 60, "solucao": "((3 + 3 + 3 + 3) * 5)", "dificuldade": "muito-dificil"},
-  {"nivel": 9, "digito": 4, "quantidade": 5, "alvo": 128, "solucao": "((4 + 4 + 4 + 4) * 8)", "dificuldade": "muito-dificil"},
-  {"nivel": 10, "digito": 5, "quantidade": 5, "alvo": 300, "solucao": "((5 + 5 + 5 + 5) * 15)", "dificuldade": "mestre"}
-]'::jsonb),
-(CURRENT_DATE + INTERVAL '7 days', '[
-  {"nivel": 1, "digito": 2, "quantidade": 3, "alvo": 5, "solucao": "(2 + 2 + 2 / 2)", "dificuldade": "facil"},
-  {"nivel": 2, "digito": 3, "quantidade": 3, "alvo": 7, "solucao": "(3 + 3 + 3 / 3)", "dificuldade": "facil"},
-  {"nivel": 3, "digito": 2, "quantidade": 4, "alvo": 22, "solucao": "((2 + 2) * 5 + 2)", "dificuldade": "medio"},
-  {"nivel": 4, "digito": 3, "quantidade": 4, "alvo": 30, "solucao": "((3 + 3) * 5)", "dificuldade": "medio"},
-  {"nivel": 5, "digito": 4, "quantidade": 3, "alvo": 15, "solucao": "(4 * 4 - 4 / 4)", "dificuldade": "dificil"},
-  {"nivel": 6, "digito": 4, "quantidade": 4, "alvo": 48, "solucao": "((4 + 4 + 4 + 4) * 3)", "dificuldade": "dificil"},
-  {"nivel": 7, "digito": 5, "quantidade": 4, "alvo": 80, "solucao": "((5 + 5) * (5 + 5 - 2))", "dificuldade": "dificil"},
-  {"nivel": 8, "digito": 3, "quantidade": 5, "alvo": 72, "solucao": "((3 + 3 + 3 + 3) * 6)", "dificuldade": "muito-dificil"},
-  {"nivel": 9, "digito": 4, "quantidade": 5, "alvo": 144, "solucao": "((4 + 4 + 4 + 4) * 9)", "dificuldade": "muito-dificil"},
-  {"nivel": 10, "digito": 5, "quantidade": 5, "alvo": 375, "solucao": "((5 * 5 * 5) * (5 - 5 / 5))", "dificuldade": "mestre"}
-]'::jsonb)
-ON CONFLICT (data) DO NOTHING;
+-- Dia 1
+(CURRENT_DATE + 1, 'facil',   3, 3, 9,   '(3 + 3 + 3)'),
+(CURRENT_DATE + 1, 'medio',   5, 3, 25,  '(5 * 5 + 5 - 5)'),
+(CURRENT_DATE + 1, 'dificil', 4, 5, 44,  '(44 + (4 - 4))'),
+
+-- Dia 2
+(CURRENT_DATE + 2, 'facil',   2, 4, 8,   '(2 + 2 + 2 + 2)'),
+(CURRENT_DATE + 2, 'medio',   3, 4, 27,  '(3 * 3 * 3 + 3 - 3)'),
+(CURRENT_DATE + 2, 'dificil', 5, 5, 55,  '(55 + (5 - 5))'),
+
+-- Dia 3
+(CURRENT_DATE + 3, 'facil',   4, 3, 12,  '(4 + 4 + 4)'),
+(CURRENT_DATE + 3, 'medio',   2, 4, 20,  '((2 + 2) * (2 + 2 + 2))'),
+(CURRENT_DATE + 3, 'dificil', 3, 5, 30,  '((3 + 3) * (3 + 3 - 3) + 3 - 3)'),
+
+-- Dia 4
+(CURRENT_DATE + 4, 'facil',   5, 3, 15,  '(5 + 5 + 5)'),
+(CURRENT_DATE + 4, 'medio',   4, 4, 24,  '((4 + 4) * (4 - (4 / 4)))'),
+(CURRENT_DATE + 4, 'dificil', 2, 5, 22,  '((2 + 2) * (2 + 2 + 2) + 2 + 2)'),
+
+-- Dia 5
+(CURRENT_DATE + 5, 'facil',   3, 3, 3,   '(3 + 3 - 3)'),
+(CURRENT_DATE + 5, 'medio',   5, 4, 30,  '((5 + 5) * (5 - 5 / 5))'),
+(CURRENT_DATE + 5, 'dificil', 4, 5, 64,  '(4 * 4 * 4 + 4 - 4)'),
+
+-- Dia 6
+(CURRENT_DATE + 6, 'facil',   2, 3, 4,   '(2 * 2 - 2 + 2)'),
+(CURRENT_DATE + 6, 'medio',   3, 4, 36,  '((3 + 3) * (3 + 3))'),
+(CURRENT_DATE + 6, 'dificil', 5, 5, 100, '((5 + 5) * (5 + 5 - 5 + 5))'),
+
+-- Dia 7
+(CURRENT_DATE + 7, 'facil',   4, 3, 8,   '(4 + 4 - 4 + 4)'),
+(CURRENT_DATE + 7, 'medio',   2, 4, 14,  '((2 + 2) * 2 + 2 * 2 + 2)'),
+(CURRENT_DATE + 7, 'dificil', 3, 5, 45,  '((3 + 3 + 3) * (3 + 3 - 3) - 3 + 3)'),
+
+-- Dia 8
+(CURRENT_DATE + 8, 'facil',   5, 3, 10,  '(5 + 5 * 5 / 5)'),
+(CURRENT_DATE + 8, 'medio',   4, 4, 32,  '((4 + 4) * (4 + 4 / 4 - 1))'),
+(CURRENT_DATE + 8, 'dificil', 2, 5, 16,  '((2 + 2) * (2 + 2) + 2 - 2)'),
+
+-- Dia 9
+(CURRENT_DATE + 9, 'facil',   3, 3, 6,   '(3 + 3 - 3 + 3)'),
+(CURRENT_DATE + 9, 'medio',   5, 3, 20,  '(5 * 5 - 5 - 5 + 5)'),
+(CURRENT_DATE + 9, 'dificil', 4, 5, 48,  '((4 + 4) * (4 + 4 - (4 / 4)))')
+
+ON CONFLICT (data, dificuldade) DO NOTHING;
 
 -- ============================================
--- Verificar dados inseridos
+-- Verificar
 -- ============================================
 
-SELECT 
-  data, 
-  jsonb_array_length(desafios) as total_desafios,
-  created_at
+SELECT data, dificuldade, digito, quantidade, alvo
 FROM desafio_diario
-ORDER BY data;
-
--- ============================================
--- CONCLUÍDO!
--- Execute: SELECT * FROM desafio_diario;
--- ============================================
+ORDER BY data, dificuldade;

@@ -27,6 +27,21 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+button {
+  cursor: pointer;
+}
+
+/* Remove botões internos do MathLive */
+math-field::part(menu-toggle),
+math-field::part(virtual-keyboard-toggle) {
+  display: none !important;
+}
+
+/* Esconde o teclado virtual do MathLive completamente */
+math-virtual-keyboard {
+  display: none !important;
+}
+
 .font-comic {
   font-family: "Comic Sans MS", "Comic Sans", cursive;
 }

@@ -18,6 +18,7 @@
 /out/
 
 /.claude
+/.agents
 
 # production
 /build

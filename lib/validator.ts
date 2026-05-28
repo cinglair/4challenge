@@ -5,6 +5,10 @@
 
 import { avaliarExpressao, numerosIguais } from "./evaluator";
 
+function normalizar(expr: string): string {
+  return expr.replace(/×/g, "*").replace(/÷/g, "/").replace(/−/g, "-");
+}
+
 export interface ResultadoValidacao {
   valido: boolean;
   mensagem: string;
@@ -56,8 +60,10 @@ export function validarExpressao(
   quantidadeEsperada: number,
   alvo: number,
 ): ResultadoValidacao {
+  const expr = normalizar(expressao);
+
   // 1. Valida caracteres e avalia a expressão
-  const resultadoAvaliacao = avaliarExpressao(expressao);
+  const resultadoAvaliacao = avaliarExpressao(expr);
 
   if (!resultadoAvaliacao.sucesso) {
     return {
@@ -69,7 +75,7 @@ export function validarExpressao(
   const valorCalculado = resultadoAvaliacao.valor!;
 
   // 2. Conta ocorrências do dígito
-  const ocorrencias = contarOcorrenciasDigito(expressao, digito);
+  const ocorrencias = contarOcorrenciasDigito(expr, digito);
 
   if (ocorrencias !== quantidadeEsperada) {
     return {

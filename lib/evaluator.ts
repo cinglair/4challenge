@@ -15,28 +15,32 @@ export interface ResultadoAvaliacao {
  * Avalia uma expressão matemática de forma segura
  * Retorna o resultado ou um erro
  */
+function mensagemAmigavel(msg: string): string {
+  const m = msg.toLowerCase();
+  if (m.includes("value expected") || m.includes("unexpected end"))
+    return "Expressão incompleta — adicione o valor que falta.";
+  if (m.includes("parenthesis") || m.includes("paren"))
+    return "Parêntese não fechado — verifique os ( ).";
+  if (m.includes("divide by zero") || m.includes("division by zero"))
+    return "Divisão por zero.";
+  if (m.includes("undefined symbol") || m.includes("undefined variable"))
+    return "Símbolo não reconhecido na expressão.";
+  return "Expressão inválida — verifique os operadores e parênteses.";
+}
+
+function normalizarExpressao(expr: string): string {
+  return expr
+    .replace(/×/g, "*")   // unicode × → *
+    .replace(/÷/g, "/")   // unicode ÷ → /
+    .replace(/−/g, "-");  // unicode minus → ASCII minus
+}
+
 export function avaliarExpressao(expressao: string): ResultadoAvaliacao {
   try {
-    // Remove espaços extras
-    const expressaoLimpa = expressao.trim();
+    const expressaoLimpa = normalizarExpressao(expressao.trim());
 
-    // Verifica se a expressão está vazia
     if (!expressaoLimpa) {
-      return {
-        sucesso: false,
-        erro: "Expressão vazia",
-      };
-    }
-
-    // Valida caracteres permitidos
-    // Permite: dígitos, operadores básicos e avançados, parênteses, ponto decimal, espaços
-    // Operadores: +, -, *, /, ^, !, sqrt
-    const caracteresPermitidos = /^[\d+\-*/().\s^!a-z]+$/i;
-    if (!caracteresPermitidos.test(expressaoLimpa)) {
-      return {
-        sucesso: false,
-        erro: "Expressão contém caracteres não permitidos",
-      };
+      return { sucesso: false, erro: "Expressão vazia" };
     }
 
     // Avalia a expressão usando mathjs (seguro)
@@ -62,9 +66,10 @@ export function avaliarExpressao(expressao: string): ResultadoAvaliacao {
       valor: resultado,
     };
   } catch (erro) {
+    const msg = erro instanceof Error ? erro.message : "";
     return {
       sucesso: false,
-      erro: erro instanceof Error ? erro.message : "Erro ao avaliar expressão",
+      erro: mensagemAmigavel(msg),
     };
   }
 }
