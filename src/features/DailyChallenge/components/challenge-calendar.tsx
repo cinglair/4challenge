@@ -9,6 +9,7 @@ import {
    dayProgress,
    formatDateLabel,
    formatMonthLabel,
+   formatShortDate,
    loadPlays,
    monthOf,
    shiftMonth,
@@ -80,7 +81,7 @@ export function ChallengeCalendar({
                <rect x="3.5" y="5" width="17" height="15.5" rx="3" />
                <path d="M3.5 10h17M8 3v4M16 3v4" />
             </svg>
-            <time dateTime={date}>{label}</time>
+            <time dateTime={date}>{formatShortDate(parseISODate(date))}</time>
          </button>
 
          {open && (

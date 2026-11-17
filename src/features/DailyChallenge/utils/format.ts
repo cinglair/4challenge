@@ -41,6 +41,14 @@ export function toText(row: Row): string {
       .join('')
 }
 
+/** Ex.: "17 nov". */
+export function formatShortDate(date: Date): string {
+   const month = new Intl.DateTimeFormat('pt-BR', { month: 'short' })
+      .format(date)
+      .replace('.', '')
+   return `${date.getDate()} ${month}`
+}
+
 /** Ex.: "terça-feira, 17 de novembro". */
 export function formatDateLabel(date: Date): string {
    return new Intl.DateTimeFormat('pt-BR', {

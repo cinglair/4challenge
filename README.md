@@ -1,4 +1,4 @@
-# Algarismos — o desafio diário
+# algorism.io — o desafio diário dos algarismos
 
 Jogo diário de matemática: forme o número-alvo usando um único algarismo, uma
 quantidade exata de vezes. São três desafios por dia:

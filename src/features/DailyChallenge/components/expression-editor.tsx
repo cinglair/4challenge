@@ -1,4 +1,10 @@
-import { useEffect, useRef, type KeyboardEvent, type RefObject } from 'react'
+import {
+   useEffect,
+   useLayoutEffect,
+   useRef,
+   type KeyboardEvent,
+   type RefObject,
+} from 'react'
 
 import type { Cursor, Evaluation, Row } from '../types'
 import { endCursor, formatValue, toText } from '../utils'
@@ -22,6 +28,9 @@ interface ExpressionEditorProps {
    onPlace: (cursor: Cursor) => void
 }
 
+/** Até quanto a conta pode encolher (fração do tamanho normal). */
+const MIN_FIT = 0.5
+
 export function ExpressionEditor({
    editorRef,
    puzzleId,
@@ -37,6 +46,33 @@ export function ExpressionEditor({
    onPlace,
 }: ExpressionEditorProps) {
    const scrollRef = useRef<HTMLDivElement>(null)
+   const exprRef = useRef<HTMLDivElement>(null)
+
+   // Conta comprida: a fonte encolhe aos poucos até caber; abaixo do mínimo, a caixa rola.
+   useLayoutEffect(() => {
+      const box = scrollRef.current
+      const expr = exprRef.current
+      if (!box || !expr) return
+      const fit = () => {
+         expr.style.fontSize = '' // mede no tamanho cheio
+         let scale = 1
+         // algumas medidas não acompanham a fonte (o cursor, as bordas), então
+         // uma conta só não basta: repete até caber ou chegar ao mínimo
+         for (let pass = 0; pass < 4; pass++) {
+            if (expr.offsetWidth <= box.clientWidth || scale <= MIN_FIT) break
+            scale = Math.max(
+               MIN_FIT,
+               (scale * box.clientWidth) / expr.offsetWidth - 0.005
+            )
+            expr.style.fontSize = `${scale}em`
+         }
+      }
+      fit()
+      // o espaço muda com a janela e quando o resultado aparece ao lado
+      const observer = new ResizeObserver(fit)
+      observer.observe(box)
+      return () => observer.disconnect()
+   }, [root])
 
    // Mantém o cursor visível quando a conta passa da largura da tela.
    useEffect(() => {
@@ -93,7 +129,7 @@ export function ExpressionEditor({
          }}
       >
          <div className="scroll" ref={scrollRef}>
-            <div className="expr">
+            <div className="expr" ref={exprRef}>
                <MathRow
                   row={root}
                   path={[]}

@@ -1,4 +1,5 @@
 import { ChallengeCalendar } from './challenge-calendar'
+import { HowToPlay } from './how-to-play'
 
 interface ChallengeHeaderProps {
    date: string
@@ -6,6 +7,7 @@ interface ChallengeHeaderProps {
    onDateChange: (date: string) => void
 }
 
+/** Cabeçalho: ajuda à esquerda, o nome no centro e o calendário à direita. */
 export function ChallengeHeader({
    date,
    today,
@@ -13,7 +15,10 @@ export function ChallengeHeader({
 }: ChallengeHeaderProps) {
    return (
       <header className="top">
-         <span className="brand">algarismos</span>
+         <HowToPlay />
+         <h1 className="brand">
+            algorism<span>.io</span>
+         </h1>
          <ChallengeCalendar
             date={date}
             today={today}

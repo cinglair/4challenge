@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 
 import type { Level } from '../services/models'
+import { AboutFooter } from './about-footer'
 
 interface StageProps {
    level: Level
@@ -11,7 +12,10 @@ interface StageProps {
 export function Stage({ level, children }: StageProps) {
    return (
       <div className="stage" data-level={level}>
-         <main className="col">{children}</main>
+         <div className="col">
+            <main>{children}</main>
+            <AboutFooter />
+         </div>
       </div>
    )
 }
