@@ -612,13 +612,9 @@ main > .owl {
 .clue-expr {
    font: 400 1.1rem/1.2 var(--math);
 }
-.clue-expr .unknown {
-   color: var(--accent);
-   font-weight: 600;
-}
-.clue-expr .empty {
-   border: 1.5px dashed var(--accent);
-   background: var(--accent-soft);
+.clue-expr .more {
+   margin-left: 0.15em;
+   color: var(--muted);
 }
 .status.bad {
    color: var(--bad);

@@ -8,9 +8,9 @@ export type MathNode =
    | { k: 'frac'; num: Row; den: Row }
    | { k: 'pow'; exp: Row } // expoente do termo imediatamente anterior
    | { k: 'sqrt'; body: Row }
-   | { k: 'group'; body: Row } // parênteses
-   // lacuna de uma dica (um algarismo ou um sinal escondido); nunca entra na conta do jogador
-   | { k: 'hole'; of: 'digit' | 'sign' }
+   // parênteses; `open` (só nas dicas) desenha o parêntese sem fechar
+   | { k: 'group'; body: Row; open?: boolean }
+   | { k: 'more' } // reticências de uma dica; nunca entra na conta do jogador
 export type Row = MathNode[]
 
 export type Slot = 'num' | 'den' | 'exp' | 'body'

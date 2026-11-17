@@ -66,8 +66,7 @@ export function HowToPlay() {
                   você escreve.
                </li>
                <li>
-                  A <strong>dica</strong> mostra uma solução com metade dos
-                  algarismos e metade dos sinais escondidos.
+                  A <strong>dica</strong> mostra o começo de uma solução.
                </li>
                <li>
                   O <strong>calendário</strong> abre os desafios de outros dias.

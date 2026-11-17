@@ -164,83 +164,81 @@ export function solvePuzzle({
    return check.ok && isTarget(check.value, target) ? found.row : null
 }
 
-const DIGIT_HOLE: MathNode = { k: 'hole', of: 'digit' }
-const SIGN_HOLE: MathNode = { k: 'hole', of: 'sign' }
+const MORE: MathNode = { k: 'more' }
+
+/** Quantos algarismos a dica mostra: metade dos que a conta usa. */
+export const hintDigits = (count: number) => Math.max(1, Math.floor(count / 2))
 
 /**
- * Transforma uma solução em dica: mantém o desenho da conta, mas esconde
- * metade dos algarismos e metade dos sinais, alternando na ordem de leitura.
- * Conta como sinal toda operação: + − ×, fração, potência, raiz e fatorial.
+ * Transforma uma solução em dica: o começo da conta, na ordem em que se lê,
+ * seguido de reticências. Mostra metade dos algarismos e os sinais que vêm
+ * até o próximo algarismo; daí em diante, nada — nem o formato do resto.
  *
- * Algarismo escondido vira uma casa vazia; sinal escondido vira um "?".
- * Fração, potência e raiz escondidas são desmontadas em linha (a ? b), para
- * o formato não entregar qual era a operação.
- *
- * Ex.: 9 + 9/9 → 9 ? ▢/9.
+ * Ex.: 9 + 9/9 → 9 + …      (4⁴ − 44)/4 → 4⁴ − …
  */
 export function maskSolution(solution: Row): Row {
-   let digits = 0
-   let signs = 0
-   const showDigit = () => digits++ % 2 === 0 // 1º, 3º, 5º…
-   const showSign = () => signs++ % 2 === 1 // 2º, 4º…: sempre fica ao menos um escondido
+   let left = hintDigits(countAllDigits(solution))
 
-   // Parênteses em volta do que não é um número só, para a conta em linha não ficar ambígua.
-   const wrap = (row: Row): Row =>
-      row.every((n) => n.k === 'digit' || (n.k === 'hole' && n.of === 'digit'))
-         ? row
-         : [{ k: 'group', body: row }]
-
-   const mask = (row: Row): Row => {
+   // Devolve o começo de `row`; `cut` avisa que as reticências já entraram.
+   const prefix = (row: Row): { row: Row; cut: boolean } => {
       const out: Row = []
-      row.forEach((node, i) => {
+      for (const node of row) {
          switch (node.k) {
             case 'digit':
-               out.push(showDigit() ? node : DIGIT_HOLE)
+               if (left === 0) return { row: [...out, MORE], cut: true }
+               left--
+               out.push(node)
                break
-            case 'op':
-            case 'fact':
-               out.push(showSign() ? node : SIGN_HOLE)
-               break
-            case 'group':
-               out.push({ k: 'group', body: mask(node.body) })
-               break
+            case 'group': {
+               const body = prefix(node.body)
+               if (!body.cut) {
+                  out.push(node)
+                  break
+               }
+               // parêntese aberto, sem fechar: o resto ainda viria
+               out.push({ k: 'group', body: body.row, open: true })
+               return { row: out, cut: true }
+            }
             case 'sqrt': {
-               const shown = showSign()
-               const body = mask(node.body)
-               if (shown) out.push({ k: 'sqrt', body })
-               else out.push(SIGN_HOLE, { k: 'group', body })
+               const body = prefix(node.body)
+               out.push({ k: 'sqrt', body: body.row })
+               if (body.cut) return { row: out, cut: true }
                break
             }
             case 'pow': {
-               const shown = showSign()
-               const exp = mask(node.exp)
-               if (shown) out.push({ k: 'pow', exp })
-               else out.push(SIGN_HOLE, ...wrap(exp))
+               const exp = prefix(node.exp)
+               out.push({ k: 'pow', exp: exp.row })
+               if (exp.cut) return { row: out, cut: true }
                break
             }
             case 'frac': {
-               const num = mask(node.num)
-               const shown = showSign()
-               const den = mask(node.den)
-               if (shown) {
-                  out.push({ k: 'frac', num, den })
-                  break
-               }
-               const inline: Row = [...wrap(num), SIGN_HOLE, ...wrap(den)]
-               // se algo se aplica à fração inteira (potência, fatorial), mantém o conjunto unido
-               const next = row[i + 1]?.k
-               if (next === 'pow' || next === 'fact')
-                  out.push({ k: 'group', body: inline })
-               else out.push(...inline)
+               const num = prefix(node.num)
+               // cortou no numerador: a barra viria depois, então nem aparece
+               if (num.cut) return { row: [...out, ...num.row], cut: true }
+               const den = prefix(node.den)
+               out.push({ k: 'frac', num: num.row, den: den.row })
+               if (den.cut) return { row: out, cut: true }
                break
             }
-            case 'hole':
-               out.push(node)
-               break
+            default:
+               out.push(node) // sinais entre um algarismo e o próximo
          }
-      })
-      return out
+      }
+      return { row: out, cut: false }
    }
 
-   return mask(solution)
+   return prefix(solution).row
+}
+
+function countAllDigits(row: Row): number {
+   let n = 0
+   for (const node of row) {
+      if (node.k === 'digit') n++
+      else if (node.k === 'frac')
+         n += countAllDigits(node.num) + countAllDigits(node.den)
+      else if (node.k === 'pow') n += countAllDigits(node.exp)
+      else if (node.k === 'sqrt' || node.k === 'group')
+         n += countAllDigits(node.body)
+   }
+   return n
 }

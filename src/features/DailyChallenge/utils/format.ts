@@ -34,8 +34,8 @@ export function toText(row: Row): string {
                return ` raiz de (${toText(n.body)}) `
             case 'group':
                return ` (${toText(n.body)}) `
-            case 'hole':
-               return n.of === 'digit' ? ' um algarismo ' : ' algum sinal '
+            case 'more':
+               return ' …'
          }
       })
       .join('')

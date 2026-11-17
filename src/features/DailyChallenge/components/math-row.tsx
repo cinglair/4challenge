@@ -117,15 +117,11 @@ export function MathRow({ row, path, cursor, onPlace }: MathRowProps) {
                </span>
             )
             break
-         case 'hole':
+         case 'more':
             kids.push(
-               node.of === 'digit' ? (
-                  <span className="empty" data-i={i} key={i} />
-               ) : (
-                  <span className="tk op unknown" data-i={i} key={i}>
-                     ?
-                  </span>
-               )
+               <span className="tk more" data-i={i} key={i}>
+                  …
+               </span>
             )
             break
          case 'group':
@@ -133,7 +129,7 @@ export function MathRow({ row, path, cursor, onPlace }: MathRowProps) {
                <span className="group" data-i={i} key={i}>
                   <Paren />
                   <span className="group-body">{sub('body')}</span>
-                  <Paren right />
+                  {!node.open && <Paren right />}
                </span>
             )
             break
