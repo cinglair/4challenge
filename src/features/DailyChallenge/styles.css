@@ -967,9 +967,17 @@ main > .owl {
    color: var(--muted);
 }
 .about img {
-   width: min(8.5rem, 45%);
+   width: 2.75rem;
    height: auto;
-   opacity: 0.8;
+   opacity: 0.9;
+}
+.about-name {
+   font-weight: 600;
+   font-size: 0.9375rem;
+   letter-spacing: -0.02em;
+}
+.about-name span {
+   color: var(--accent); /* acompanha a cor do nível */
 }
 
 /* ── Telas baixas: tudo um pouco mais compacto para caber sem rolar ── */

@@ -17,7 +17,7 @@ export function ChallengeHeader({
       <header className="top">
          <HowToPlay />
          <h1 className="brand">
-            algorism<span>.io</span>
+            algarism<span>.io</span>
          </h1>
          <ChallengeCalendar
             date={date}
