@@ -164,113 +164,83 @@ export function solvePuzzle({
    return check.ok && isTarget(check.value, target) ? found.row : null
 }
 
-const HOLE: MathNode = { k: 'hole' }
-
-function digitsIn(row: Row): number {
-   let n = 0
-   for (const node of row) {
-      if (node.k === 'digit') n++
-      else if (node.k === 'frac') n += digitsIn(node.num) + digitsIn(node.den)
-      else if (node.k === 'pow') n += digitsIn(node.exp)
-      else if (node.k === 'sqrt' || node.k === 'group') n += digitsIn(node.body)
-   }
-   return n
-}
+const DIGIT_HOLE: MathNode = { k: 'hole', of: 'digit' }
+const SIGN_HOLE: MathNode = { k: 'hole', of: 'sign' }
 
 /**
- * Mostra de `row` só o que cabe em `budget` algarismos; o resto vira lacuna.
- * `nested` evita abrir demais a estrutura de partes que já estão dentro de
- * outra conta.
+ * Transforma uma solução em dica: mantém o desenho da conta, mas esconde
+ * metade dos algarismos e metade dos sinais, alternando na ordem de leitura.
+ * Conta como sinal toda operação: + − ×, fração, potência, raiz e fatorial.
+ *
+ * Algarismo escondido vira uma casa vazia; sinal escondido vira um "?".
+ * Fração, potência e raiz escondidas são desmontadas em linha (a ? b), para
+ * o formato não entregar qual era a operação.
+ *
+ * Ex.: 9 + 9/9 → 9 ? ▢/9.
  */
-function reveal(row: Row, budget: number, nested: boolean): Row {
-   if (budget <= 0) return [HOLE]
-   if (digitsIn(row) <= budget) return row
+export function maskSolution(solution: Row): Row {
+   let digits = 0
+   let signs = 0
+   const showDigit = () => digits++ % 2 === 0 // 1º, 3º, 5º…
+   const showSign = () => signs++ % 2 === 1 // 2º, 4º…: sempre fica ao menos um escondido
 
-   // Parcelas (ou fatores) soltos: mostra os que cabem e junta os demais numa lacuna.
-   const isOp = (n: MathNode, ops: string) => n.k === 'op' && ops.includes(n.v)
-   const ops = row.some((n) => isOp(n, '+-')) ? '+-' : '*'
-   if (row.some((n) => isOp(n, ops))) {
-      const chunks: Row[] = [[]]
-      const seps: MathNode[] = []
-      for (const n of row) {
-         if (isOp(n, ops)) {
-            seps.push(n)
-            chunks.push([])
-         } else chunks[chunks.length - 1].push(n)
-      }
+   // Parênteses em volta do que não é um número só, para a conta em linha não ficar ambígua.
+   const wrap = (row: Row): Row =>
+      row.every((n) => n.k === 'digit' || (n.k === 'hole' && n.of === 'digit'))
+         ? row
+         : [{ k: 'group', body: row }]
 
-      let left = budget
-      const shown = chunks.map((chunk) => {
-         const size = digitsIn(chunk)
-         if (size > left) return false
-         left -= size
-         return true
-      })
-
-      if (!shown.includes(true)) {
-         // nenhuma parcela cabe inteira: abre só a primeira, e só no nível de cima
-         if (nested) return [HOLE]
-         return [...reveal(chunks[0], budget, true), seps[0], HOLE]
-      }
-
+   const mask = (row: Row): Row => {
       const out: Row = []
-      chunks.forEach((chunk, i) => {
-         const hiddenRun = !shown[i] && i > 0 && !shown[i - 1]
-         if (hiddenRun) return // já coberta pela lacuna anterior
-         if (i > 0) out.push(seps[i - 1])
-         out.push(...(shown[i] ? chunk : [HOLE]))
+      row.forEach((node, i) => {
+         switch (node.k) {
+            case 'digit':
+               out.push(showDigit() ? node : DIGIT_HOLE)
+               break
+            case 'op':
+            case 'fact':
+               out.push(showSign() ? node : SIGN_HOLE)
+               break
+            case 'group':
+               out.push({ k: 'group', body: mask(node.body) })
+               break
+            case 'sqrt': {
+               const shown = showSign()
+               const body = mask(node.body)
+               if (shown) out.push({ k: 'sqrt', body })
+               else out.push(SIGN_HOLE, { k: 'group', body })
+               break
+            }
+            case 'pow': {
+               const shown = showSign()
+               const exp = mask(node.exp)
+               if (shown) out.push({ k: 'pow', exp })
+               else out.push(SIGN_HOLE, ...wrap(exp))
+               break
+            }
+            case 'frac': {
+               const num = mask(node.num)
+               const shown = showSign()
+               const den = mask(node.den)
+               if (shown) {
+                  out.push({ k: 'frac', num, den })
+                  break
+               }
+               const inline: Row = [...wrap(num), SIGN_HOLE, ...wrap(den)]
+               // se algo se aplica à fração inteira (potência, fatorial), mantém o conjunto unido
+               const next = row[i + 1]?.k
+               if (next === 'pow' || next === 'fact')
+                  out.push({ k: 'group', body: inline })
+               else out.push(...inline)
+               break
+            }
+            case 'hole':
+               out.push(node)
+               break
+         }
       })
       return out
    }
 
-   // Um termo só: desce na estrutura, mostrando primeiro a parte menor.
-   // Depois de mostrar uma parte, o resto entra como `nested` para não abrir demais.
-   const last = row[row.length - 1]
-   const rest = row.slice(0, -1)
-   switch (last.k) {
-      case 'fact':
-         return [...reveal(rest, budget, nested), last]
-      case 'pow': {
-         const exp = digitsIn(last.exp)
-         return exp <= budget
-            ? [...reveal(rest, budget - exp, true), last]
-            : [...reveal(rest, budget, nested), { k: 'pow', exp: [HOLE] }]
-      }
-      case 'frac': {
-         const den = digitsIn(last.den)
-         return den <= budget
-            ? [
-                 {
-                    k: 'frac',
-                    num: reveal(last.num, budget - den, true),
-                    den: last.den,
-                 },
-              ]
-            : [
-                 {
-                    k: 'frac',
-                    num: reveal(last.num, budget, nested),
-                    den: [HOLE],
-                 },
-              ]
-      }
-      case 'sqrt':
-         return [{ k: 'sqrt', body: reveal(last.body, budget, nested) }]
-      case 'group':
-         return [{ k: 'group', body: reveal(last.body, budget, nested) }]
-      default:
-         return [HOLE] // um número com mais algarismos do que a dica pode mostrar
-   }
-}
-
-/** Quantos algarismos uma dica pode entregar: no máximo metade da conta. */
-export const hintBudget = (count: number) => Math.max(1, Math.floor(count / 2))
-
-/**
- * Esconde a maior parte de uma solução para virar dica: mostra um pedaço
- * com no máximo metade dos algarismos e troca o resto por lacunas.
- * Ex.: 9 + 9/9 → 9 + ▢.
- */
-export function maskSolution(row: Row): Row {
-   return reveal(row, hintBudget(digitsIn(row)), false)
+   return mask(solution)
 }

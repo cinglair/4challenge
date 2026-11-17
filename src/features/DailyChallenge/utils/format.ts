@@ -35,7 +35,7 @@ export function toText(row: Row): string {
             case 'group':
                return ` (${toText(n.body)}) `
             case 'hole':
-               return ' alguma coisa '
+               return n.of === 'digit' ? ' um algarismo ' : ' algum sinal '
          }
       })
       .join('')

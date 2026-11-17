@@ -610,7 +610,11 @@ main > .owl {
    font-weight: 600;
 }
 .clue-expr {
-   font: 400 1.15rem/1.2 var(--math);
+   font: 400 1.1rem/1.2 var(--math);
+}
+.clue-expr .unknown {
+   color: var(--accent);
+   font-weight: 600;
 }
 .clue-expr .empty {
    border: 1.5px dashed var(--accent);

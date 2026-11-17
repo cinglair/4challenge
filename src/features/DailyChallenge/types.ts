@@ -9,7 +9,8 @@ export type MathNode =
    | { k: 'pow'; exp: Row } // expoente do termo imediatamente anterior
    | { k: 'sqrt'; body: Row }
    | { k: 'group'; body: Row } // parênteses
-   | { k: 'hole' } // lacuna de uma dica; nunca entra na conta do jogador
+   // lacuna de uma dica (um algarismo ou um sinal escondido); nunca entra na conta do jogador
+   | { k: 'hole'; of: 'digit' | 'sign' }
 export type Row = MathNode[]
 
 export type Slot = 'num' | 'den' | 'exp' | 'body'

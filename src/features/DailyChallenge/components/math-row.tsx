@@ -118,7 +118,15 @@ export function MathRow({ row, path, cursor, onPlace }: MathRowProps) {
             )
             break
          case 'hole':
-            kids.push(<span className="empty" data-i={i} key={i} />)
+            kids.push(
+               node.of === 'digit' ? (
+                  <span className="empty" data-i={i} key={i} />
+               ) : (
+                  <span className="tk op unknown" data-i={i} key={i}>
+                     ?
+                  </span>
+               )
+            )
             break
          case 'group':
             kids.push(

@@ -59,7 +59,7 @@ export function Keypad({
          <button
             className="link clue-toggle"
             aria-pressed={hinted}
-            title={hinted ? 'Esconder a dica' : 'Mostrar parte de uma solução'}
+            title={hinted ? 'Esconder a dica' : 'Mostrar metade de uma solução'}
             onPointerDown={
                (e) => e.preventDefault() /* o foco fica no editor */
             }

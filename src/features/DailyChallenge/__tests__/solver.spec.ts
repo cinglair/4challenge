@@ -6,7 +6,6 @@ import type { MathNode, Row } from '../types'
 import {
    countDigits,
    evaluate,
-   hintBudget,
    maskSolution,
    solvePuzzle,
    toText,
@@ -59,76 +58,96 @@ describe('solvePuzzle', () => {
 })
 
 describe('maskSolution', () => {
-   const HOLE: MathNode = { k: 'hole' }
+   const DIGIT: MathNode = { k: 'hole', of: 'digit' }
+   const SIGN: MathNode = { k: 'hole', of: 'sign' }
+   const SIGNS = ['op', 'fact', 'frac', 'pow', 'sqrt']
+   const count = (row: Row, pick: (n: MathNode) => boolean): number =>
+      row.reduce(
+         (sum, n) =>
+            sum +
+            (pick(n) ? 1 : 0) +
+            ('num' in n ? count(n.num, pick) + count(n.den, pick) : 0) +
+            ('exp' in n ? count(n.exp, pick) : 0) +
+            ('body' in n ? count(n.body, pick) : 0),
+         0
+      )
 
-   it('mostra um pedaço da conta e esconde o resto', () => {
+   it('esconde um sim, um não: algarismos a partir do 2º, sinais a partir do 1º', () => {
       const row: Row = [d(9), op('+'), { k: 'frac', num: [d(9)], den: [d(9)] }]
-      expect(maskSolution(row)).toEqual([d(9), op('+'), HOLE])
+      expect(maskSolution(row)).toEqual([
+         d(9),
+         SIGN,
+         { k: 'frac', num: [DIGIT], den: [d(9)] },
+      ])
+      expect(toText(maskSolution(row))).toBe(
+         '9 algum sinal  ( um algarismo ) sobre (9) '
+      )
    })
 
-   it('mostra a parcela que cabe na dica, mesmo que não seja a primeira', () => {
+   it('mantém o formato da conta com somas e produtos', () => {
       const row: Row = [d(4), op('*'), d(4), op('-'), d(4)]
-      expect(toText(maskSolution(row))).toBe(' alguma coisa  menos 4')
+      expect(maskSolution(row)).toEqual([d(4), SIGN, DIGIT, op('-'), d(4)])
    })
 
-   it('junta as parcelas escondidas numa lacuna só', () => {
-      // 5 + 5 + 5 + 5 + 5: a dica pode mostrar dois dos cinco algarismos
-      const row: Row = [
-         d(5),
-         op('+'),
-         d(5),
-         op('+'),
-         d(5),
-         op('+'),
-         d(5),
-         op('+'),
-         d(5),
-      ]
-      expect(maskSolution(row)).toEqual([d(5), op('+'), d(5), op('+'), HOLE])
-   })
-
-   it('num termo só, mostra a parte menor da estrutura', () => {
+   it('desmonta em linha a fração, a potência e a raiz escondidas', () => {
       expect(
          maskSolution([{ k: 'frac', num: [d(8), d(8)], den: [d(8)] }])
-      ).toEqual([{ k: 'frac', num: [HOLE], den: [d(8)] }])
+      ).toEqual([d(8), DIGIT, SIGN, d(8)])
       expect(maskSolution([d(2), { k: 'pow', exp: [d(2), d(2)] }])).toEqual([
          d(2),
-         { k: 'pow', exp: [HOLE] },
+         SIGN,
+         DIGIT,
+         d(2),
       ])
       expect(
-         maskSolution([
-            { k: 'group', body: [d(3), op('+'), d(3)] },
-            { k: 'fact' },
-         ])
-      ).toEqual([{ k: 'group', body: [d(3), op('+'), HOLE] }, { k: 'fact' }])
+         maskSolution([{ k: 'sqrt', body: [d(9)] }, op('+'), d(9)])
+      ).toEqual([SIGN, { k: 'group', body: [d(9)] }, op('+'), DIGIT])
    })
 
-   it('não abre a estrutura de parcelas grandes que estão dentro de outra conta', () => {
-      // (4⁴ − 44) / 4 → ▢ / 4, sem entregar a potência nem a subtração
+   it('põe parênteses no que não é um número só ao desmontar', () => {
+      // 55 / (5 + 5): a fração é o 1º sinal na ordem de leitura, então é ela que some
       const row: Row = [
-         {
-            k: 'frac',
-            num: [d(4), { k: 'pow', exp: [d(4)] }, op('-'), d(4), d(4)],
-            den: [d(4)],
-         },
+         { k: 'frac', num: [d(5), d(5)], den: [d(5), op('+'), d(5)] },
       ]
       expect(maskSolution(row)).toEqual([
-         { k: 'frac', num: [HOLE], den: [d(4)] },
+         d(5),
+         DIGIT,
+         SIGN,
+         { k: 'group', body: [d(5), op('+'), DIGIT] },
       ])
    })
 
-   it('entrega no máximo metade dos algarismos, e nunca só uma lacuna', () => {
+   it('mantém a fração quando o sinal escondido é outro', () => {
+      // (5 + 55) / 5: o 1º sinal é o +, a fração fica à mostra
+      const row: Row = [
+         { k: 'frac', num: [d(5), op('+'), d(5), d(5)], den: [d(5)] },
+      ]
+      expect(maskSolution(row)).toEqual([
+         { k: 'frac', num: [d(5), SIGN, DIGIT, d(5)], den: [DIGIT] },
+      ])
+   })
+
+   it('em todo desafio mostra metade dos algarismos e metade dos sinais', () => {
       for (const level of Object.keys(MOCK_DB) as Level[])
-         for (const [target, digit, count] of MOCK_DB[level]) {
-            const hint = maskSolution(
-               solvePuzzle({ target, digit, count, level })!
-            )
-            const label = `${level} ${target} (${count}×${digit}): ${toText(hint)}`
-            expect(kinds(hint), label).toContain('hole')
-            expect(countDigits(hint), label).toBeLessThanOrEqual(
-               hintBudget(count)
-            )
-            expect(countDigits(hint), label).toBeGreaterThan(0)
+         for (const [target, digit, n] of MOCK_DB[level]) {
+            const solution = solvePuzzle({ target, digit, count: n, level })!
+            const hint = maskSolution(solution)
+            const label = `${level} ${target} (${n}×${digit}): ${toText(hint)}`
+            const signs = count(solution, (x) => SIGNS.includes(x.k))
+
+            expect(countDigits(hint), label).toBe(Math.ceil(n / 2))
+            expect(
+               count(hint, (x) => x.k === 'hole' && x.of === 'digit'),
+               label
+            ).toBe(Math.floor(n / 2))
+            expect(
+               count(hint, (x) => SIGNS.includes(x.k)),
+               label
+            ).toBe(Math.floor(signs / 2))
+            expect(
+               count(hint, (x) => x.k === 'hole' && x.of === 'sign'),
+               label
+            ).toBe(Math.ceil(signs / 2))
          }
    })
 })
