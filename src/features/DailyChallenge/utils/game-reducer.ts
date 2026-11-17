@@ -49,7 +49,7 @@ export function gameReducer(g: Game, a: GameAction): Game {
             ...g,
             plays: {
                ...g.plays,
-               [g.level]: { ...play, hinted: !play.hinted },
+               [g.level]: { ...play, hinted: !play.hinted, usedHint: true },
             },
             note: null,
          }

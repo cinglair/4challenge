@@ -3,7 +3,7 @@ import type { Puzzle } from '../models'
 
 export function mapDailyPuzzleDTOToModel(dto: DailyPuzzleDTO): Puzzle {
    return {
-      id: dto.id,
+      id: `${dto.date}-${dto.level}`,
       date: dto.date,
       level: dto.level,
       target: dto.target,

@@ -3,10 +3,10 @@ export function AboutFooter() {
    return (
       <footer className="about">
          <img
-            src="/logo-algorism.webp"
-            alt="algorism.io"
+            src="/logo-algarism.webp"
+            alt="algarism.io"
             width={720}
-            height={191}
+            height={192}
             loading="lazy"
          />
          <p>Desafios diários de matemática</p>

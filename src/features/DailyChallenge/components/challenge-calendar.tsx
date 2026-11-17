@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { parseISODate } from '@/src/shared'
 
 import {
+   FIRST_PUZZLE_DATE,
    WEEKDAYS,
    buildMonthGrid,
    compareMonth,
@@ -66,6 +67,7 @@ export function ChallengeCalendar({
 
    const label = formatDateLabel(parseISODate(date))
    const isLastMonth = compareMonth(month, monthOf(today)) >= 0
+   const isFirstMonth = compareMonth(month, monthOf(FIRST_PUZZLE_DATE)) <= 0
 
    return (
       <div className="calendar" ref={wrapRef}>
@@ -94,6 +96,7 @@ export function ChallengeCalendar({
                   <button
                      type="button"
                      aria-label="Mês anterior"
+                     disabled={isFirstMonth}
                      onClick={() => setMonth(shiftMonth(month, -1))}
                   >
                      <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -127,8 +130,8 @@ export function ChallengeCalendar({
                   ))}
                   {buildMonthGrid(month).map((iso, i) => {
                      if (!iso) return <span key={'blank' + i} />
-                     const future = iso > today
-                     const progress = future
+                     const unavailable = iso > today || iso < FIRST_PUZZLE_DATE
+                     const progress = unavailable
                         ? 'none'
                         : dayProgress(loadPlays(iso))
                      return (
@@ -144,7 +147,7 @@ export function ChallengeCalendar({
                               formatDateLabel(parseISODate(iso)) +
                               PROGRESS_LABEL[progress]
                            }
-                           disabled={future}
+                           disabled={unavailable}
                            onClick={() => pick(iso)}
                         >
                            {Number(iso.slice(8))}

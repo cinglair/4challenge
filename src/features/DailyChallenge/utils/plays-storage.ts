@@ -1,6 +1,6 @@
 import type { Plays } from '../types'
 
-/* Progresso do dia guardado no navegador (troque por sua API de usuário). */
+/* Progresso do dia guardado no navegador, inclusive se a dica foi pedida. */
 
 export const emptyPlays = (): Plays => ({
    easy: { root: [], solved: false, tries: 0, hinted: false },

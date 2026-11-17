@@ -7,6 +7,9 @@ export const LEVELS: Array<{ id: Level; label: string; hue: number }> = [
    { id: 'hard', label: 'Difícil', hue: 25 },
 ]
 
+/** Primeiro dia com desafios no banco (AAAA-MM-DD). */
+export const FIRST_PUZZLE_DATE = '2026-11-01'
+
 export const RANK: Record<Level, number> = { easy: 0, medium: 1, hard: 2 }
 
 export const COUNT_WORD: Record<number, string> = {

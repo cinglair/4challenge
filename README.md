@@ -1,4 +1,4 @@
-# algorism.io — o desafio diário dos algarismos
+# algarism.io — o desafio diário dos algarismos
 
 Jogo diário de matemática: forme o número-alvo usando um único algarismo, uma
 quantidade exata de vezes. São três desafios por dia:
@@ -9,7 +9,9 @@ quantidade exata de vezes. São três desafios por dia:
 | Médio   | tudo do Fácil, mais potência e raiz |
 | Difícil | tudo do Médio, mais fatorial        |
 
-O progresso do dia fica guardado no `localStorage` do navegador.
+Os desafios e as dicas vêm do Supabase (tabela `daily_puzzles`); a dica só é
+buscada quando o jogador pede. O progresso do dia — inclusive se a dica foi
+pedida — fica guardado no `localStorage` do navegador.
 
 ## Stack
 
@@ -19,6 +21,15 @@ O progresso do dia fica guardado no `localStorage` do navegador.
 - [Vitest](https://vitest.dev), ESLint e Prettier
 
 ## Como rodar
+
+Crie um arquivo `.env` na raiz com a URL e a chave publicável do projeto no
+Supabase (Project Settings → API); em produção, defina as mesmas variáveis no
+provedor de hospedagem:
+
+```bash
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
 
 ```bash
 yarn            # instala as dependências
@@ -35,6 +46,19 @@ yarn dev        # sobe o app em http://localhost:5173
 | `yarn typecheck` | `tsc --noEmit`                   |
 | `yarn fix`       | formata o projeto com o Prettier |
 
+## Desafios no banco
+
+A tabela `daily_puzzles` guarda um desafio por dia e nível, com a dica. O
+esquema está em `supabase/migrations/` e a carga atual (1º/11/2026 a
+30/04/2027) em `supabase/seed.sql`. Para gerar mais dias, conferidos pelo
+solver do jogo:
+
+```bash
+node scripts/generate-daily-puzzles.mjs 2027-05-01 2027-08-31 > mais-dias.sql
+```
+
+Os desafios só ficam legíveis pela API a partir da véspera do dia (UTC).
+
 ## Organização de pastas
 
 ```
@@ -50,7 +74,7 @@ src/
 │       ├── components/       # editor, teclado, abas de nível, enunciado…
 │       ├── hooks/            # use-game, use-challenge-input, use-level-hue…
 │       ├── services/         # DTO, http, mappers, models, queries
-│       ├── mocks/            # desafios provisórios no lugar do banco
+│       ├── mocks/            # desafios de exemplo para os testes
 │       ├── utils/            # árvore, avaliador, reducer, formatação, storage
 │       └── __tests__/
 └── shared/                   # código reutilizável entre features

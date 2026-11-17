@@ -66,7 +66,7 @@ export function HowToPlay() {
                   você escreve.
                </li>
                <li>
-                  A <strong>dica</strong> revela uma parte de uma solução.
+                  A <strong>dica</strong> mostra o começo de uma solução.
                </li>
                <li>
                   O <strong>calendário</strong> abre os desafios de outros dias.
