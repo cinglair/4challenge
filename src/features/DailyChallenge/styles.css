@@ -1,56 +1,38 @@
 /* ── Palco e fundo ─────────────────────────────────────────────── */
 .stage {
-   position: relative;
    min-height: 100%;
-   overflow: hidden;
+   display: flex;
    background:
-      radial-gradient(130% 75% at 88% -5%, var(--bg-2), transparent 62%),
+      radial-gradient(120% 70% at 50% -10%, var(--bg-2), transparent 65%),
       var(--bg);
-}
-.ghost {
-   position: absolute;
-   right: -0.04em;
-   bottom: -0.1em;
-   z-index: 0;
-   font: 600 clamp(20rem, 105vmin, 62rem) / 0.74 var(--math);
-   color: var(--ghost);
-   pointer-events: none;
-   user-select: none;
-   transition: transform 1s cubic-bezier(0.2, 0.7, 0.1, 1);
-}
-[data-level='medium'] .ghost {
-   transform: translate(-10%, -26%) rotate(-9deg);
-}
-[data-level='hard'] .ghost {
-   transform: translate(-22%, -48%) rotate(13deg) scale(1.18);
 }
 
 .col {
-   position: relative;
-   z-index: 1;
+   /* alturas do teclado, reaproveitadas para o painel "Resolvido" não mudar o tamanho da tela */
+   --key-h: clamp(2.75rem, 6.6vh, 3.25rem);
+   --action-h: 3.25rem;
    width: min(100%, 31rem);
-   margin: 0 auto;
+   margin: 0 auto; /* centrado só na horizontal; o topo fica no topo */
    padding: 1rem 1.25rem 1.5rem;
    display: flex;
    flex-direction: column;
 }
-@media (min-width: 62rem) {
-   .col {
-      margin-left: max(7vw, calc(50vw - 36rem));
-      padding-top: 2rem;
-   }
-}
 .lead {
-   margin-top: 30vh;
+   margin-top: 1rem;
    font-size: 1.05rem;
    color: var(--muted);
+   text-align: center;
+}
+.col > .owl {
+   margin: 2rem auto 0;
 }
 
 /* ── Cabeçalho e níveis ────────────────────────────────────────── */
 .top {
+   position: relative;
    display: flex;
    justify-content: space-between;
-   align-items: baseline;
+   align-items: center;
    gap: 1rem;
    font-size: 0.875rem;
    color: var(--muted);
@@ -60,10 +42,147 @@
    color: var(--ink);
    letter-spacing: -0.01em;
 }
+
+/* ── Calendário ────────────────────────────────────────────────── */
+.calendar-trigger {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.45rem;
+   min-height: 2.25rem;
+   padding: 0 0.7rem;
+   border-radius: 999px;
+   background: var(--key);
+   box-shadow: var(--shadow);
+   color: var(--ink);
+   font-weight: 500;
+   transition: background 0.15s;
+}
+.calendar-trigger:hover,
+.calendar-trigger[aria-expanded='true'] {
+   background: var(--accent-soft);
+}
+.calendar svg {
+   width: 1.1rem;
+   height: 1.1rem;
+   fill: none;
+   stroke: currentColor;
+   stroke-width: 1.6;
+   stroke-linecap: round;
+   stroke-linejoin: round;
+}
+.calendar-trigger svg {
+   color: var(--accent);
+}
+.calendar-pop {
+   position: absolute;
+   top: calc(100% + 0.5rem);
+   right: 0;
+   z-index: 10;
+   width: min(19rem, 100%);
+   padding: 0.75rem;
+   border-radius: 1.1rem;
+   border: 1px solid var(--line);
+   background: oklch(99.6% 0.004 var(--h));
+   box-shadow: 0 12px 32px oklch(33% 0.03 var(--h) / 0.14);
+   color: var(--ink);
+   animation: rise 0.18s ease-out;
+}
+.calendar-nav {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+}
+.calendar-nav button {
+   display: grid;
+   place-items: center;
+   width: 2.25rem;
+   height: 2.25rem;
+   border-radius: 50%;
+}
+.calendar-nav button:hover:not(:disabled) {
+   background: var(--accent-soft);
+}
+.calendar-nav button:disabled {
+   opacity: 0.3;
+   cursor: default;
+}
+.calendar-month {
+   font-weight: 600;
+   font-size: 0.95rem;
+}
+.calendar-month::first-letter {
+   text-transform: uppercase;
+}
+.calendar-grid {
+   display: grid;
+   grid-template-columns: repeat(7, 1fr);
+   gap: 0.15rem;
+   margin-top: 0.4rem;
+}
+.calendar-weekday {
+   display: grid;
+   place-items: center;
+   height: 1.75rem;
+   font-size: 0.75rem;
+   font-weight: 600;
+   color: var(--muted);
+}
+.calendar-day {
+   position: relative;
+   display: grid;
+   place-items: center;
+   aspect-ratio: 1;
+   border-radius: 50%;
+   font-variant-numeric: tabular-nums;
+   transition: background 0.12s;
+}
+.calendar-day:hover:not(:disabled) {
+   background: var(--accent-soft);
+}
+.calendar-day:disabled {
+   color: var(--muted);
+   opacity: 0.4;
+   cursor: default;
+}
+.calendar-day.today {
+   box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.calendar-day[aria-pressed='true'] {
+   background: var(--accent);
+   color: var(--on-accent);
+   font-weight: 600;
+}
+/* pontinho: vazado = em andamento, cheio = os três resolvidos */
+.calendar-day[data-progress='partial']::after,
+.calendar-day[data-progress='done']::after {
+   content: '';
+   position: absolute;
+   bottom: 0.2rem;
+   width: 0.3rem;
+   height: 0.3rem;
+   border-radius: 50%;
+   border: 1px solid currentColor;
+}
+.calendar-day[data-progress='done']::after {
+   background: currentColor;
+}
+.calendar-day[data-progress]:not([aria-pressed='true'])::after {
+   color: var(--accent);
+}
+.calendar-today {
+   display: block;
+   width: 100%;
+   height: 2.4rem;
+   margin-top: 0.5rem;
+   border-radius: 0.7rem;
+   background: var(--accent-soft);
+   font-weight: 500;
+}
 .levels {
    display: flex;
-   gap: 1.5rem;
-   margin-top: 1.5rem;
+   justify-content: center;
+   gap: 1.75rem;
+   margin-top: 0.5rem;
    border-bottom: 1px solid var(--line);
 }
 .level {
@@ -79,7 +198,7 @@
 }
 .level[aria-selected='true'] {
    color: var(--ink);
-   border-bottom-color: var(--ink);
+   border-bottom-color: var(--accent);
 }
 .tick {
    width: 0.9rem;
@@ -92,24 +211,33 @@
 }
 
 /* ── Enunciado ─────────────────────────────────────────────────── */
+.hero {
+   display: flex;
+   align-items: center;
+   gap: clamp(0.5rem, 3vw, 1.25rem);
+   margin-top: clamp(0.75rem, 2.5vh, 1.5rem);
+}
 .brief {
-   margin-top: clamp(1rem, 3.5vh, 2rem);
+   /* ocupa o espaço que sobra, para a coruja não andar quando o enunciado muda */
+   flex: 1;
+   min-width: 0;
 }
 .ask {
    font-size: 1.0625rem;
    color: var(--muted);
 }
 .target {
-   font: 600 clamp(4.5rem, 21vw, 7rem) / 0.95 var(--math);
+   font: 600 clamp(3.75rem, 17vw, 5rem) / 0.95 var(--math);
    letter-spacing: -0.035em;
-   margin: 0.04em 0 0.1em -0.03em;
+   margin: 0.04em 0 0.1em;
    font-variant-numeric: lining-nums;
 }
 .tiles {
    display: flex;
+   flex-wrap: wrap;
    align-items: center;
    gap: 0.4rem;
-   margin-top: 0.75rem;
+   margin-top: 0.6rem;
 }
 .tile {
    display: grid;
@@ -145,20 +273,28 @@
    display: flex;
    align-items: center;
    gap: 0.75rem;
-   margin-top: clamp(1rem, 3vh, 1.75rem);
-   min-height: 6.25rem;
-   border-bottom: 2px solid var(--ink);
+   margin-top: clamp(0.75rem, 2.5vh, 1.25rem);
+   min-height: 5.5rem;
+   padding: 0 0.6rem 0 1rem;
+   border: 1.5px solid var(--line);
+   border-radius: 1.1rem;
+   background: var(--surface);
+   box-shadow: var(--shadow);
    font: 400 clamp(1.9rem, 8.2vw, 2.6rem) / 1.25 var(--math);
    cursor: text;
    outline: none;
    touch-action: manipulation;
+   transition: border-color 0.15s;
 }
 .editor:focus-visible {
-   border-bottom-color: var(--accent);
+   outline: none;
+   border-color: var(--accent);
+   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .editor.solved {
    cursor: default;
-   border-bottom-color: var(--accent);
+   border-color: var(--accent);
+   background: var(--accent-soft);
 }
 .scroll {
    flex: 1;
@@ -173,7 +309,7 @@
 }
 .expr {
    position: relative;
-   margin: auto 0;
+   margin: auto 0; /* à esquerda, centrado na vertical */
    padding-right: 0.4em;
    white-space: nowrap;
 }
@@ -193,6 +329,35 @@
 .value.hit {
    color: var(--accent);
    font-weight: 600;
+}
+/* olho: liga e desliga o resultado ao vivo */
+.reveal {
+   flex: none;
+   display: grid;
+   place-items: center;
+   width: 2.5rem;
+   height: 2.5rem;
+   border-radius: 50%;
+   color: var(--muted);
+   transition:
+      background 0.15s,
+      color 0.15s;
+}
+.reveal:hover {
+   background: var(--accent-soft);
+}
+.reveal[aria-checked='true'] {
+   background: var(--accent-soft);
+   color: var(--accent);
+}
+.reveal svg {
+   width: 1.35rem;
+   height: 1.35rem;
+   fill: none;
+   stroke: currentColor;
+   stroke-width: 1.6;
+   stroke-linecap: round;
+   stroke-linejoin: round;
 }
 
 .row {
@@ -325,11 +490,37 @@
 }
 
 .status {
-   min-height: 1.4rem;
-   margin-top: 0.5rem;
+   /* altura fixa, com lugar para a dica, para o teclado não sair do lugar */
+   height: 3.75rem;
+   margin-top: 0.4rem;
+   display: flex;
+   align-items: center;
+   justify-content: center;
    font-size: 0.9375rem;
    line-height: 1.4;
    color: var(--muted);
+   text-align: center;
+}
+.clue {
+   display: inline-flex;
+   align-items: center;
+   gap: 0.6rem;
+   color: var(--ink);
+}
+.clue-label {
+   padding: 0.15rem 0.55rem;
+   border-radius: 999px;
+   background: var(--accent-soft);
+   color: var(--primary);
+   font-size: 0.8125rem;
+   font-weight: 600;
+}
+.clue-expr {
+   font: 400 1.15rem/1.2 var(--math);
+}
+.clue-expr .empty {
+   border: 1.5px dashed var(--accent);
+   background: var(--accent-soft);
 }
 .status.bad {
    color: var(--bad);
@@ -340,14 +531,15 @@
    display: grid;
    grid-template-columns: repeat(4, 1fr);
    gap: 0.5rem;
-   margin-top: 0.75rem;
+   margin-top: 0.4rem;
 }
 .key {
    display: grid;
    place-items: center;
-   height: clamp(3rem, 7.4vh, 3.6rem);
+   height: var(--key-h);
    border-radius: 0.9rem;
    background: var(--key);
+   box-shadow: var(--shadow);
    font: 400 1.5rem/1 var(--math);
    transition:
       transform 0.08s,
@@ -376,7 +568,7 @@
 }
 .link {
    grid-column: span 1;
-   height: 3.25rem;
+   height: var(--action-h);
    margin-top: 0.25rem;
    font-weight: 500;
    color: var(--muted);
@@ -388,12 +580,12 @@
 }
 .primary {
    grid-column: span 3;
-   height: 3.25rem;
+   height: var(--action-h);
    margin-top: 0.25rem;
    padding: 0 1.5rem;
    border-radius: 0.9rem;
-   background: var(--ink);
-   color: var(--bg);
+   background: var(--primary);
+   color: var(--on-accent);
    font-weight: 600;
    font-size: 1.0625rem;
    transition: transform 0.08s;
@@ -401,15 +593,43 @@
 .primary:active {
    transform: scale(0.98);
 }
+.pad .primary {
+   grid-column: span 2;
+   padding: 0 0.5rem;
+   font-size: 1rem;
+}
+.clue-toggle {
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   gap: 0.35rem;
+   color: var(--primary);
+}
+.clue-toggle svg {
+   width: 1.15rem;
+   height: 1.15rem;
+   fill: none;
+   stroke: currentColor;
+   stroke-width: 1.6;
+   stroke-linecap: round;
+   stroke-linejoin: round;
+}
+.clue-toggle:hover,
+.clue-toggle[aria-pressed='true'] {
+   background: var(--accent-soft);
+}
 
 /* ── Resolvido ─────────────────────────────────────────────────── */
 .done {
-   margin-top: 1rem;
+   margin-top: 0.4rem;
+   /* mesma altura do teclado: 3 fileiras + 3 vãos + a fileira de ações */
+   min-height: calc(3 * var(--key-h) + 1.75rem + var(--action-h));
    display: flex;
    flex-direction: column;
-   align-items: flex-start;
+   align-items: center;
+   text-align: center;
    gap: 0.5rem;
-   animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.1, 1);
+   animation: fade 0.3s ease-out; /* sem deslocar, para não balançar ao trocar de nível */
 }
 .done h2 {
    font: 600 1.75rem/1.15 var(--math);
@@ -427,6 +647,11 @@
    color: var(--ink);
    font-weight: 500;
 }
+@keyframes fade {
+   from {
+      opacity: 0;
+   }
+}
 @keyframes rise {
    from {
       opacity: 0;
@@ -434,16 +659,249 @@
    }
 }
 
+/* ── Coruja ────────────────────────────────────────────────────── */
+.owl {
+   flex: none;
+   display: block;
+   width: clamp(6.5rem, 31vw, 9.5rem);
+   height: auto;
+   overflow: visible;
+}
+.owl * {
+   transform-box: fill-box;
+   transform-origin: center;
+}
+.owl-wood {
+   fill: none;
+   stroke: var(--owl-wood);
+   stroke-width: 7;
+   stroke-linecap: round;
+}
+.owl-wood.thin {
+   stroke-width: 3.5;
+}
+.owl-leaf {
+   fill: var(--owl-leaf);
+}
+.owl-leaves {
+   transform-origin: 0% 100%;
+   animation: owl-leaves 5s ease-in-out infinite;
+}
+.owl-body {
+   fill: var(--owl-body);
+}
+.owl-wing {
+   fill: var(--owl-wing);
+   transform-origin: 50% 8%;
+}
+.owl-belly {
+   fill: var(--owl-belly);
+}
+.owl-beak,
+.owl-foot {
+   fill: var(--owl-beak);
+}
+.owl-eye-white {
+   fill: oklch(99.5% 0.004 var(--h));
+}
+.owl-pupil {
+   fill: var(--ink);
+}
+.owl-glint {
+   fill: oklch(100% 0 0);
+}
+.owl-smile,
+.owl-brow {
+   fill: none;
+   stroke: var(--ink);
+   stroke-width: 3;
+   stroke-linecap: round;
+   stroke-linejoin: round;
+   display: none;
+}
+
+/* Parada: respira, pisca, olha para os lados e inclina a cabeça de vez em quando. */
+.owl-figure {
+   transform-origin: 50% 100%;
+   animation: owl-breathe 3.4s ease-in-out infinite;
+}
+.owl-tilt {
+   transform-origin: 50% 90%;
+   animation: owl-tilt 9s ease-in-out infinite;
+}
+.owl-eye {
+   animation: owl-blink 4.6s ease-in-out infinite;
+}
+.owl-pupils {
+   animation: owl-look 7s ease-in-out infinite;
+}
+.owl-wing.left {
+   transform: rotate(10deg);
+}
+.owl-wing.right {
+   transform: rotate(-10deg);
+}
+
+/* Acertou agora: pula no galho e bate as asas. Nível já resolvido: só o sorriso. */
+.owl[data-mood='cheer'] .owl-perch {
+   animation: owl-hop 0.55s cubic-bezier(0.3, 0.6, 0.4, 1) 3;
+}
+.owl[data-mood='cheer'] .owl-branch {
+   transform-origin: 100% 50%;
+   animation: owl-bounce 0.55s ease-in-out 3;
+}
+.owl[data-mood='happy'] .owl-tilt,
+.owl[data-mood='cheer'] .owl-tilt {
+   animation: none;
+}
+.owl[data-mood='happy'] .owl-eye,
+.owl[data-mood='cheer'] .owl-eye {
+   display: none;
+}
+.owl[data-mood='happy'] .owl-smile,
+.owl[data-mood='cheer'] .owl-smile {
+   display: block;
+}
+.owl[data-mood='cheer'] .owl-wing.left {
+   animation: owl-flap-left 0.28s ease-in-out 6 alternate;
+}
+.owl[data-mood='cheer'] .owl-wing.right {
+   animation: owl-flap-right 0.28s ease-in-out 6 alternate;
+}
+
+/* Errou: balança a cabeça, franze a testa e olha para baixo. */
+.owl[data-mood='oops'] .owl-tilt {
+   animation: owl-shake 0.6s ease-in-out 1;
+}
+.owl[data-mood='oops'] .owl-brow {
+   display: block;
+}
+.owl[data-mood='oops'] .owl-pupils {
+   animation: none;
+   transform: translateY(3px);
+}
+
+@keyframes owl-breathe {
+   50% {
+      transform: scale(1.015, 0.975);
+   }
+}
+@keyframes owl-leaves {
+   50% {
+      transform: rotate(-7deg);
+   }
+}
+@keyframes owl-tilt {
+   0%,
+   58%,
+   82%,
+   100% {
+      transform: rotate(0);
+   }
+   64%,
+   76% {
+      transform: rotate(-7deg);
+   }
+}
+@keyframes owl-blink {
+   0%,
+   91%,
+   100% {
+      transform: scaleY(1);
+   }
+   95% {
+      transform: scaleY(0.08);
+   }
+}
+@keyframes owl-look {
+   0%,
+   38%,
+   100% {
+      transform: translate(0, 0);
+   }
+   46%,
+   60% {
+      transform: translate(-3px, 0.5px);
+   }
+   70%,
+   88% {
+      transform: translate(3px, 0.5px);
+   }
+}
+@keyframes owl-hop {
+   40% {
+      transform: translateY(-11px);
+   }
+}
+@keyframes owl-bounce {
+   75% {
+      transform: rotate(1.6deg);
+   }
+}
+@keyframes owl-flap-left {
+   to {
+      transform: rotate(68deg);
+   }
+}
+@keyframes owl-flap-right {
+   to {
+      transform: rotate(-68deg);
+   }
+}
+@keyframes owl-shake {
+   20%,
+   60% {
+      transform: rotate(-6deg);
+   }
+   40%,
+   80% {
+      transform: rotate(6deg);
+   }
+}
+
+/* ── Telas baixas: tudo um pouco mais compacto para caber sem rolar ── */
+@media (max-height: 720px) {
+   .col {
+      --key-h: 2.6rem;
+      --action-h: 2.85rem;
+      padding-top: 0.6rem;
+      padding-bottom: 0.75rem;
+   }
+   .level {
+      min-height: 40px;
+      padding: 0.4rem 0;
+   }
+   .hero {
+      margin-top: 0.6rem;
+   }
+   .owl {
+      width: 6.25rem;
+   }
+   .target {
+      font-size: 3.4rem;
+   }
+   .tile {
+      width: 1.8rem;
+      height: 2rem;
+      font-size: 1.1rem;
+   }
+   .editor {
+      min-height: 4.6rem;
+      font-size: 1.9rem;
+   }
+}
+
 @media (prefers-reduced-motion: reduce) {
    :root,
-   .ghost,
    .tile,
    .key,
-   .primary {
+   .primary,
+   .editor {
       transition: none;
    }
    .caret::after,
-   .done {
-      animation: none;
+   .done,
+   .owl * {
+      animation: none !important;
    }
 }

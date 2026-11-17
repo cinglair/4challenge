@@ -5,10 +5,10 @@ import type { Level } from '../services/models'
 
 interface DailyChallengeViewProps {
    level: Level
-   digit: number
    headerComponent: ReactNode
    levelTabsComponent: ReactNode
    briefComponent: ReactNode
+   mascotComponent: ReactNode
    editorComponent: ReactNode
    statusComponent: ReactNode
    actionsComponent: ReactNode
@@ -16,19 +16,22 @@ interface DailyChallengeViewProps {
 
 export function DailyChallengeView({
    level,
-   digit,
    headerComponent,
    levelTabsComponent,
    briefComponent,
+   mascotComponent,
    editorComponent,
    statusComponent,
    actionsComponent,
 }: DailyChallengeViewProps) {
    return (
-      <Stage level={level} digit={digit}>
+      <Stage level={level}>
          {headerComponent}
          {levelTabsComponent}
-         {briefComponent}
+         <div className="hero">
+            {briefComponent}
+            {mascotComponent}
+         </div>
          {editorComponent}
          {statusComponent}
          {actionsComponent}

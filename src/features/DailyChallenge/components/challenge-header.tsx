@@ -1,10 +1,24 @@
-import { formatDateLabel } from '../utils'
+import { ChallengeCalendar } from './challenge-calendar'
 
-export function ChallengeHeader({ date }: { date: string }) {
+interface ChallengeHeaderProps {
+   date: string
+   today: string
+   onDateChange: (date: string) => void
+}
+
+export function ChallengeHeader({
+   date,
+   today,
+   onDateChange,
+}: ChallengeHeaderProps) {
    return (
       <header className="top">
          <span className="brand">algarismos</span>
-         <time dateTime={date}>{formatDateLabel(new Date())}</time>
+         <ChallengeCalendar
+            date={date}
+            today={today}
+            onDateChange={onDateChange}
+         />
       </header>
    )
 }

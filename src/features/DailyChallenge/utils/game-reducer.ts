@@ -26,6 +26,7 @@ export function createInitialGame(plays: Plays): Game {
       plays,
       cursor: endCursor(plays.easy.root),
       note: null,
+      celebrating: false,
    }
 }
 
@@ -37,9 +38,22 @@ export function gameReducer(g: Game, a: GameAction): Game {
             level: a.level,
             cursor: endCursor(g.plays[a.level].root),
             note: null,
+            celebrating: false,
          }
       case 'place':
          return g.plays[g.level].solved ? g : { ...g, cursor: a.cursor }
+      case 'hint': {
+         const play = g.plays[g.level]
+         if (play.solved) return g
+         return {
+            ...g,
+            plays: {
+               ...g.plays,
+               [g.level]: { ...play, hinted: !play.hinted },
+            },
+            note: null,
+         }
+      }
       case 'wrongDigit':
          return g.plays[g.level].solved
             ? g
@@ -132,6 +146,7 @@ export function gameReducer(g: Game, a: GameAction): Game {
                      },
                   },
                   note: null,
+                  celebrating: true,
                }
             }
          }

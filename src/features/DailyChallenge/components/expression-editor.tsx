@@ -13,6 +13,9 @@ interface ExpressionEditorProps {
    solved: boolean
    live: Evaluation | null
    hit: boolean
+   /** Mostra o valor da conta enquanto ela é montada. */
+   showResult: boolean
+   onToggleResult: () => void
    /** Carimbo do último aviso de erro; 0 quando não há. */
    badStamp: number
    onKeyDown: (e: KeyboardEvent) => void
@@ -27,6 +30,8 @@ export function ExpressionEditor({
    solved,
    live,
    hit,
+   showResult,
+   onToggleResult,
    badStamp,
    onKeyDown,
    onPlace,
@@ -100,10 +105,32 @@ export function ExpressionEditor({
                )}
             </div>
          </div>
-         {live?.ok && (
+         {live?.ok && (solved || showResult) && (
             <output className={'value' + (hit || solved ? ' hit' : '')}>
                {formatValue(live.value)}
             </output>
+         )}
+         {!solved && (
+            <button
+               type="button"
+               className="reveal"
+               role="switch"
+               aria-checked={showResult}
+               aria-label="Mostrar resultado"
+               title={showResult ? 'Esconder resultado' : 'Mostrar resultado'}
+               onPointerDown={(e) => {
+                  e.stopPropagation() // não move o cursor da conta
+                  e.preventDefault() // o foco fica no editor
+               }}
+               onKeyDown={(e) => e.stopPropagation()}
+               onClick={onToggleResult}
+            >
+               <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z" />
+                  <circle cx="12" cy="12" r="2.8" />
+                  {!showResult && <path d="M4.5 4.5l15 15" />}
+               </svg>
+            </button>
          )}
       </div>
    )

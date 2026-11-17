@@ -3,9 +3,9 @@ import type { Plays } from '../types'
 /* Progresso do dia guardado no navegador (troque por sua API de usuário). */
 
 export const emptyPlays = (): Plays => ({
-   easy: { root: [], solved: false, tries: 0 },
-   medium: { root: [], solved: false, tries: 0 },
-   hard: { root: [], solved: false, tries: 0 },
+   easy: { root: [], solved: false, tries: 0, hinted: false },
+   medium: { root: [], solved: false, tries: 0, hinted: false },
+   hard: { root: [], solved: false, tries: 0, hinted: false },
 })
 
 const storeKey = (date: string) => `algarismos:v1:${date}`

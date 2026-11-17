@@ -38,6 +38,13 @@ describe('gameReducer', () => {
       ])
       expect(g.plays.easy).toMatchObject({ solved: true, tries: 1 })
       expect(g.note).toBeNull()
+      expect(g.celebrating).toBe(true)
+
+      // a comemoração é só na hora do acerto, não ao revisitar o nível
+      const away = gameReducer(g, { type: 'level', level: 'medium' })
+      const back = gameReducer(away, { type: 'level', level: 'easy' })
+      expect(back.plays.easy.solved).toBe(true)
+      expect(back.celebrating).toBe(false)
    })
 
    it('recusa a conta com a quantidade errada de algarismos', () => {

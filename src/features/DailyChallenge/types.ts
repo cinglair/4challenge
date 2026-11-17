@@ -9,6 +9,7 @@ export type MathNode =
    | { k: 'pow'; exp: Row } // expoente do termo imediatamente anterior
    | { k: 'sqrt'; body: Row }
    | { k: 'group'; body: Row } // parênteses
+   | { k: 'hole' } // lacuna de uma dica; nunca entra na conta do jogador
 export type Row = MathNode[]
 
 export type Slot = 'num' | 'den' | 'exp' | 'body'
@@ -50,6 +51,8 @@ export interface Play {
    root: Row
    solved: boolean
    tries: number
+   /** A dica deste nível está à mostra. */
+   hinted: boolean
 }
 export type Plays = Record<Level, Play>
 
@@ -64,11 +67,14 @@ export interface Game {
    plays: Plays
    cursor: Cursor
    note: Note | null
+   /** Acabou de acertar o nível em jogo (dispara a comemoração). */
+   celebrating: boolean
 }
 
 export type GameAction =
    | { type: 'level'; level: Level }
    | { type: 'place'; cursor: Cursor }
+   | { type: 'hint' }
    | { type: 'key'; key: Key; puzzle: Puzzle }
    | { type: 'wrongDigit'; puzzle: Puzzle }
 

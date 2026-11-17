@@ -2,9 +2,9 @@ import type { Level } from '../services/models'
 import type { Key } from '../types'
 
 export const LEVELS: Array<{ id: Level; label: string; hue: number }> = [
-   { id: 'easy', label: 'Fácil', hue: 168 },
-   { id: 'medium', label: 'Médio', hue: 78 },
-   { id: 'hard', label: 'Difícil', hue: 8 },
+   { id: 'easy', label: 'Fácil', hue: 165 },
+   { id: 'medium', label: 'Médio', hue: 85 },
+   { id: 'hard', label: 'Difícil', hue: 25 },
 ]
 
 export const RANK: Record<Level, number> = { easy: 0, medium: 1, hard: 2 }
