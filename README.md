@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Algarismos — o desafio diário
 
-## Getting Started
+Jogo diário de matemática: forme o número-alvo usando um único algarismo, uma
+quantidade exata de vezes. São três desafios por dia:
 
-First, run the development server:
+| Nível   | Operações liberadas                 |
+| ------- | ----------------------------------- |
+| Fácil   | `+` `−` `×`, fração e parênteses    |
+| Médio   | tudo do Fácil, mais potência e raiz |
+| Difícil | tudo do Médio, mais fatorial        |
+
+O progresso do dia fica guardado no `localStorage` do navegador.
+
+## Stack
+
+- [React 19](https://react.dev) + [TypeScript](https://www.typescriptlang.org)
+- [Vite](https://vite.dev) (dev server e build)
+- [TanStack Query](https://tanstack.com/query) para a busca dos desafios
+- [Vitest](https://vitest.dev), ESLint e Prettier
+
+## Como rodar
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+yarn            # instala as dependências
+yarn dev        # sobe o app em http://localhost:5173
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Script           | O que faz                        |
+| ---------------- | -------------------------------- |
+| `yarn dev`       | servidor de desenvolvimento      |
+| `yarn build`     | checa os tipos e gera `dist/`    |
+| `yarn preview`   | serve o build de produção        |
+| `yarn test`      | roda os testes (Vitest)          |
+| `yarn lint`      | ESLint em `src/`                 |
+| `yarn typecheck` | `tsc --noEmit`                   |
+| `yarn fix`       | formata o projeto com o Prettier |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Organização de pastas
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+src/
+├── main.tsx                  # ponto de entrada
+├── app/                      # raiz do app: providers globais e CSS global
+├── features/
+│   └── DailyChallenge/       # a tela do jogo
+│       ├── index.ts
+│       ├── types.ts          # árvore da expressão, cursor, estado do jogo
+│       ├── styles.css
+│       ├── presentation/     # index → controller (estado) → view (layout)
+│       ├── components/       # editor, teclado, abas de nível, enunciado…
+│       ├── hooks/            # use-game, use-challenge-input, use-level-hue…
+│       ├── services/         # DTO, http, mappers, models, queries
+│       ├── mocks/            # desafios provisórios no lugar do banco
+│       ├── utils/            # árvore, avaliador, reducer, formatação, storage
+│       └── __tests__/
+└── shared/                   # código reutilizável entre features
+```
 
-## Learn More
+Os imports entre pastas usam o alias `@/` (raiz do projeto), por exemplo
+`import { localISODate } from '@/src/shared'`.
 
-To learn more about Next.js, take a look at the following resources:
+## Trocando o mock pela API
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Os desafios vêm de `fetchDailyPuzzles` em
+`src/features/DailyChallenge/services/http/index.ts`, que hoje lê
+`mocks/daily-puzzles.ts`. Para usar o banco de verdade, troque o corpo dessa
+função pela chamada real (ex.: `GET /api/puzzles?date=AAAA-MM-DD`) e ajuste o
+`DailyPuzzleDTO` e o mapper se o formato da resposta for diferente.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Protótipo original
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`docs/prototype/algarismos.html` é a versão original do jogo em um único
+arquivo HTML (React via CDN), mantida como referência.

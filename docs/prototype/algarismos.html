@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Algarismos, o desafio diário</title>
+<style>
+:root { box-sizing: border-box; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script>
+"use strict";(()=>{var pe=Object.create;var H=Object.defineProperty;var me=Object.getOwnPropertyDescriptor;var he=Object.getOwnPropertyNames;var fe=Object.getPrototypeOf,ge=Object.prototype.hasOwnProperty;var _=(e,t)=>()=>{try{return t||e((t={exports:{}}).exports,t),t.exports}catch(o){throw t=0,o}};var ve=(e,t,o,s)=>{if(t&&typeof t=="object"||typeof t=="function")for(let i of he(t))!ge.call(e,i)&&i!==o&&H(e,i,{get:()=>t[i],enumerable:!(s=me(t,i))||s.enumerable});return e};var K=(e,t,o)=>(o=e!=null?pe(fe(e)):{},ve(t||!e||!e.__esModule?H(o,"default",{value:e,enumerable:!0}):o,e));var O=_((Fe,V)=>{"use strict";V.exports=window.React});var Y=_((Ie,U)=>{"use strict";U.exports=window.ReactDOM});var se=K(O()),ie=K(Y());var r=K(O()),ye={easy:[[7,8,4],[16,4,4],[6,5,3],[10,9,4],[48,6,4],[4,3,3],[44,2,4],[12,5,4],[44,2,3],[36,3,4],[4,1,4],[5,6,3],[10,9,3],[42,7,4]],medium:[[32,5,4],[64,2,5],[103,9,5],[24,4,3],[30,9,4],[98,8,5],[64,1,5],[20,8,4],[111,5,5],[38,4,4],[10,5,3],[24,2,4],[53,4,5],[48,3,5]],hard:[[132,5,4],[116,3,5],[93,4,5],[133,6,5],[131,9,5],[127,3,4],[71,9,4],[133,5,5],[35,2,5],[104,4,4],[102,7,5],[69,8,5],[119,1,5],[23,8,4]]};async function be(e){await new Promise(o=>setTimeout(o,300));let t=Math.floor(Date.parse(e+"T00:00:00Z")/864e5);return q.map(({id:o})=>{let s=ye[o],[i,a,u]=s[(t%s.length+s.length)%s.length];return{id:`${e}-${o}`,date:e,level:o,target:i,digit:a,count:u}})}var q=[{id:"easy",label:"F\xE1cil",hue:168},{id:"medium",label:"M\xE9dio",hue:78},{id:"hard",label:"Dif\xEDcil",hue:8}],T={easy:0,medium:1,hard:2},W={2:"dois",3:"tr\xEAs",4:"quatro",5:"cinco",6:"seis"};function x(e){return e.k==="frac"?["num","den"]:e.k==="pow"?["exp"]:e.k==="sqrt"||e.k==="group"?["body"]:[]}function v(e,t){return e.k==="frac"?t==="num"?e.num:e.den:e.k==="pow"?e.exp:e.k==="sqrt"||e.k==="group"?e.body:[]}function ke(e,t,o){return e.k==="frac"?t==="num"?{...e,num:o}:{...e,den:o}:e.k==="pow"?{...e,exp:o}:e.k==="sqrt"||e.k==="group"?{...e,body:o}:e}function k(e,t){let o=e;for(let s of t)o=v(o[s.i],s.slot);return o}function A(e,t,o){if(t.length===0)return o;let[s,...i]=t,a=e.slice();return a[s.i]=ke(e[s.i],s.slot,A(v(e[s.i],s.slot),i,o)),a}var we=(e,t)=>e.length===t.length&&e.every((o,s)=>o.i===t[s].i&&o.slot===t[s].slot);function z(e,t){let{path:o,index:s}=e.cursor,i=k(e.root,o);if(t.k==="frac"){let n=s;for(;n>0&&i[n-1].k!=="op";)n--;let p=i.slice(n,s),h={k:"frac",num:p,den:[]},d=[...i.slice(0,n),h,...i.slice(s)];return{root:A(e.root,o,d),cursor:{path:[...o,{i:n,slot:p.length?"den":"num"}],index:0}}}let a=[...i.slice(0,s),t,...i.slice(s)],u=A(e.root,o,a),l=x(t);return l.length?{root:u,cursor:{path:[...o,{i:s,slot:l[0]}],index:0}}:{root:u,cursor:{path:o,index:s+1}}}function xe(e){let{path:t,index:o}=e.cursor,s=k(e.root,t);if(o>0){let d=s[o-1],m=x(d),D=m.every(w=>v(d,w).length===0);if(m.length&&!D){let w=m[m.length-1];return{root:e.root,cursor:{path:[...t,{i:o-1,slot:w}],index:v(d,w).length}}}let L=[...s.slice(0,o-1),...s.slice(o)];return{root:A(e.root,t,L),cursor:{path:t,index:o-1}}}if(!t.length)return e;let i=t[t.length-1],a=t.slice(0,-1),u=k(e.root,a),l=u[i.i],n=[],p=0;for(let d of x(l))d===i.slot&&(p=n.length),n.push(...v(l,d));let h=[...u.slice(0,i.i),...n,...u.slice(i.i+1)];return{root:A(e.root,a,h),cursor:{path:a,index:i.i+p}}}function Ne(e){let{path:t,index:o}=e.cursor,s=k(e.root,t);if(o>0){let p=s[o-1],h=x(p);if(!h.length)return{path:t,index:o-1};let d=h[h.length-1];return{path:[...t,{i:o-1,slot:d}],index:v(p,d).length}}if(!t.length)return e.cursor;let i=t[t.length-1],a=t.slice(0,-1),u=k(e.root,a)[i.i],l=x(u),n=l.indexOf(i.slot);return n>0?{path:[...a,{i:i.i,slot:l[n-1]}],index:v(u,l[n-1]).length}:{path:a,index:i.i}}function ze(e){let{path:t,index:o}=e.cursor,s=k(e.root,t);if(o<s.length){let n=x(s[o]);return n.length?{path:[...t,{i:o,slot:n[0]}],index:0}:{path:t,index:o+1}}if(!t.length)return e.cursor;let i=t[t.length-1],a=t.slice(0,-1),u=x(k(e.root,a)[i.i]),l=u.indexOf(i.slot);return l<u.length-1?{path:[...a,{i:i.i,slot:u[l+1]}],index:0}:{path:a,index:i.i+1}}function J(e,t){let{path:o}=e.cursor,s=t==="up"?"den":"num",i=t==="up"?"num":"den";for(let a=o.length-1;a>=0;a--){if(o[a].slot!==s)continue;let u=o.slice(0,a),l=k(e.root,u)[o[a].i];return{path:[...u,{i:o[a].i,slot:i}],index:v(l,i).length}}return e.cursor}function De(e){let{path:t}=e.cursor;for(let o=t.length-1;o>=0;o--){let s=t.slice(0,o);if(k(e.root,s)[t[o].i].k==="group")return{path:s,index:t[o].i+1}}return e.cursor}function G(e){let t=0;for(let o of e){o.k==="digit"&&t++;for(let s of x(o))t+=G(v(o,s))}return t}var g=class extends Error{};function Se(e){let t=Math.round(e);if(Math.abs(e-t)>1e-9||t<0)throw new g("Fatorial s\xF3 vale para inteiros a partir de zero.");if(t>18)throw new g("Esse fatorial \xE9 grande demais.");let o=1;for(let s=2;s<=t;s++)o*=s;return o}function P(e){if(!e.length)throw new g("Ainda h\xE1 um espa\xE7o vazio na conta.");let t=0,o=()=>{let l=e[t];if(!l)throw new g("A conta termina em um operador.");switch(l.k){case"digit":{let n=0;for(let p=e[t];p&&p.k==="digit";p=e[++t])n=n*10+p.v;return n}case"group":return t++,P(l.body);case"sqrt":{t++;let n=P(l.body);if(n<0)throw new g("N\xE3o d\xE1 para tirar raiz de n\xFAmero negativo.");return Math.sqrt(n)}case"frac":{t++;let n=P(l.num),p=P(l.den);if(p===0)throw new g("Divis\xE3o por zero.");return n/p}case"pow":throw new g("Falta a base da pot\xEAncia.");case"fact":throw new g("Falta um n\xFAmero antes do fatorial.");default:throw new g("H\xE1 dois operadores seguidos.")}},s=()=>{let l=o();for(;;){let n=e[t];if(n?.k==="pow"){if(t++,l=Math.pow(l,P(n.exp)),!Number.isFinite(l))throw new g("Essa pot\xEAncia n\xE3o tem resultado real.")}else if(n?.k==="fact")t++,l=Se(l);else return l}},i=()=>{let l=e[t];return l?.k==="op"&&l.v==="-"?(t++,-i()):s()},a=()=>{let l=i();for(;;){let n=e[t];if(!n)return l;if(n.k==="op"){if(n.v!=="*")return l;t++,l*=i();continue}let p=e[t-1];if(n.k==="group"||n.k==="sqrt"||p.k==="group"){l*=s();continue}throw new g("Falta um operador entre dois termos.")}},u=a();for(;t<e.length;){let l=e[t++],n=a();u=l.k==="op"&&l.v==="+"?u+n:u-n}return u}function Z(e){try{let t=P(e);return Number.isFinite(t)?{ok:!0,value:t}:{ok:!1,error:"O resultado \xE9 grande demais."}}catch(t){if(t instanceof g)return{ok:!1,error:t.message};throw t}}var R=(e,t)=>Math.abs(e-t)<1e-9;function ee(e){let t=Math.round(e);return Math.abs(e-t)<1e-9?"= "+t.toLocaleString("pt-BR"):"\u2248 "+e.toLocaleString("pt-BR",{maximumFractionDigits:3})}function C(e){return e.map(t=>{switch(t.k){case"digit":return String(t.v);case"op":return t.v==="+"?" mais ":t.v==="-"?" menos ":" vezes ";case"fact":return" fatorial";case"frac":return` (${C(t.num)}) sobre (${C(t.den)}) `;case"pow":return` elevado a (${C(t.exp)}) `;case"sqrt":return` raiz de (${C(t.body)}) `;case"group":return` (${C(t.body)}) `}}).join("")}var te=()=>({easy:{root:[],solved:!1,tries:0},medium:{root:[],solved:!1,tries:0},hard:{root:[],solved:!1,tries:0}}),I=e=>({path:[],index:e.length}),re={pow:"medium",sqrt:"medium",fact:"hard"},oe={easy:"",medium:"Pot\xEAncia e raiz entram no n\xEDvel M\xE9dio.",hard:"O fatorial entra no n\xEDvel Dif\xEDcil."},Me=0,M=(e,t="bad")=>({text:e,tone:t,stamp:++Me});function Pe(e,t){switch(t.type){case"load":return{...e,plays:t.plays,cursor:I(t.plays[e.level].root)};case"level":return{...e,level:t.level,cursor:I(e.plays[t.level].root),note:null};case"place":return e.plays[e.level].solved?e:{...e,cursor:t.cursor};case"wrongDigit":return e.plays[e.level].solved?e:{...e,note:M(`Neste desafio s\xF3 vale o ${t.puzzle.digit}.`)};case"key":{let o=e.plays[e.level];if(o.solved)return e;let s=re[t.key];if(s&&T[e.level]<T[s])return{...e,note:M(oe[s],"info")};let i={root:o.root,cursor:e.cursor},a=l=>({...e,plays:{...e.plays,[e.level]:{...o,root:l.root}},cursor:l.cursor,note:null}),u=l=>({...e,cursor:l});switch(t.key){case"digit":return a(z(i,{k:"digit",v:t.puzzle.digit}));case"+":case"-":case"*":return a(z(i,{k:"op",v:t.key}));case"frac":return a(z(i,{k:"frac",num:[],den:[]}));case"group":return a(z(i,{k:"group",body:[]}));case"pow":return a(z(i,{k:"pow",exp:[]}));case"sqrt":return a(z(i,{k:"sqrt",body:[]}));case"fact":return a(z(i,{k:"fact"}));case"del":return a(xe(i));case"clear":return a({root:[],cursor:{path:[],index:0}});case"left":return u(Ne(i));case"right":return u(ze(i));case"up":return u(J(i,"up"));case"down":return u(J(i,"down"));case"close":return u(De(i));case"check":{let{target:l,digit:n,count:p}=t.puzzle;if(!o.root.length)return{...e,note:M("Monte uma conta antes de conferir.","info")};let h=D=>({...e,plays:{...e.plays,[e.level]:{...o,tries:o.tries+1}},note:D}),d=Z(o.root);if(!d.ok)return{...e,note:M(d.error)};let m=G(o.root);return m!==p?h(M(`Use exatamente ${W[p]??p} algarismos ${n}. Voc\xEA usou ${m}.`)):R(d.value,l)?{...e,plays:{...e.plays,[e.level]:{...o,solved:!0,tries:o.tries+1}},note:null}:h(M(`Essa conta d\xE1 ${ee(d.value).slice(2)}. O alvo \xE9 ${l}.`))}}}}}var ne=e=>`algarismos:v1:${e}`;function Ce(e){try{let t=localStorage.getItem(ne(e));return t?{...te(),...JSON.parse(t)}:null}catch{return null}}function Le(e,t){try{localStorage.setItem(ne(e),JSON.stringify(t))}catch{}}function Ee(e){let t=o=>String(o).padStart(2,"0");return`${e.getFullYear()}-${t(e.getMonth()+1)}-${t(e.getDate())}`}var qe={"+":"+","-":"\u2212","*":"\xD7"};function ae({row:e,path:t,cursor:o,onPlace:s}){let i=o!==null&&we(o.path,t),a=l=>{if(!s)return;l.stopPropagation();let n=e.length;for(let p of Array.from(l.currentTarget.children)){if(p.dataset.i===void 0)continue;let h=p.getBoundingClientRect();if(l.clientX<h.left+h.width/2){n=Number(p.dataset.i);break}}s({path:t,index:n})};if(!e.length)return r.default.createElement("span",{className:"row",onPointerDown:a},t.length?r.default.createElement("span",{className:"empty"+(i?" on":"")}):i&&r.default.createElement("i",{className:"caret"}));let u=[];return e.forEach((l,n)=>{i&&o.index===n&&u.push(r.default.createElement("i",{className:"caret",key:"caret"})),l.k==="pow"&&(n===0||e[n-1].k==="op")&&u.push(r.default.createElement("span",{className:"empty",key:"base"+n}));let p=h=>r.default.createElement(ae,{row:v(l,h),path:[...t,{i:n,slot:h}],cursor:o,onPlace:s});switch(l.k){case"digit":u.push(r.default.createElement("span",{className:"tk","data-i":n,key:n},l.v));break;case"op":u.push(r.default.createElement("span",{className:"tk op","data-i":n,key:n},qe[l.v]));break;case"fact":u.push(r.default.createElement("span",{className:"tk","data-i":n,key:n},"!"));break;case"frac":u.push(r.default.createElement("span",{className:"frac","data-i":n,key:n},r.default.createElement("span",{className:"num"},p("num")),r.default.createElement("span",{className:"bar"}),r.default.createElement("span",{className:"den"},p("den"))));break;case"pow":u.push(r.default.createElement("span",{className:"pow"+(n>0&&e[n-1].k==="group"?" hi":""),"data-i":n,key:n},p("exp")));break;case"sqrt":u.push(r.default.createElement("span",{className:"sqrt","data-i":n,key:n},r.default.createElement("span",{className:"stretch rad"},r.default.createElement("svg",{viewBox:"0 0 100 100",preserveAspectRatio:"none","aria-hidden":"true"},r.default.createElement("path",{d:"M4 60 L24 54 L50 97 L92 1 L100 1"}))),r.default.createElement("span",{className:"sqrt-body"},p("body"))));break;case"group":u.push(r.default.createElement("span",{className:"group","data-i":n,key:n},r.default.createElement(Q,null),r.default.createElement("span",{className:"group-body"},p("body")),r.default.createElement(Q,{right:!0})));break}}),i&&o.index===e.length&&u.push(r.default.createElement("i",{className:"caret",key:"caret"})),r.default.createElement("span",{className:"row",onPointerDown:a},u)}function Q({right:e}){return r.default.createElement("span",{className:"stretch paren"+(e?" r":"")},r.default.createElement("svg",{viewBox:"0 0 100 100",preserveAspectRatio:"none","aria-hidden":"true"},r.default.createElement("path",{d:"M82 2 Q-12 50 82 98"})))}var E=({x:e,y:t,w:o,h:s})=>r.default.createElement("rect",{x:e,y:t,width:o,height:s,rx:"1.5",strokeDasharray:"2.4 2"}),Ae={frac:r.default.createElement("svg",{viewBox:"0 0 24 24","aria-hidden":"true"},r.default.createElement(E,{x:8,y:2.5,w:8,h:6.5}),r.default.createElement("path",{d:"M4.5 12h15"}),r.default.createElement(E,{x:8,y:15,w:8,h:6.5})),pow:r.default.createElement("svg",{viewBox:"0 0 24 24","aria-hidden":"true"},r.default.createElement(E,{x:3.5,y:9,w:10,h:11.5}),r.default.createElement(E,{x:15.5,y:3,w:5.5,h:6.5})),sqrt:r.default.createElement("svg",{viewBox:"0 0 24 24","aria-hidden":"true"},r.default.createElement("path",{d:"M2.5 13.5l2.5-1 3 7.5L12 4.5h9.5"}),r.default.createElement(E,{x:13,y:9,w:7,h:9})),del:r.default.createElement("svg",{viewBox:"0 0 24 24","aria-hidden":"true"},r.default.createElement("path",{d:"M8.5 5.5H21v13H8.5L3 12z"}),r.default.createElement("path",{d:"M12 9.5l5 5M17 9.5l-5 5"})),left:r.default.createElement("svg",{viewBox:"0 0 24 24","aria-hidden":"true"},r.default.createElement("path",{d:"M14.5 6l-6 6 6 6"})),right:r.default.createElement("svg",{viewBox:"0 0 24 24","aria-hidden":"true"},r.default.createElement("path",{d:"M9.5 6l6 6-6 6"}))},Te=[{key:"digit",label:"Algarismo"},{key:"+",label:"Mais",text:"+"},{key:"-",label:"Menos",text:"\u2212"},{key:"*",label:"Vezes",text:"\xD7"},{key:"frac",label:"Fra\xE7\xE3o"},{key:"group",label:"Par\xEAnteses",text:"( )"},{key:"pow",label:"Pot\xEAncia"},{key:"sqrt",label:"Raiz quadrada"},{key:"fact",label:"Fatorial",text:"!"},{key:"left",label:"Cursor para a esquerda"},{key:"right",label:"Cursor para a direita"},{key:"del",label:"Apagar"}],Be={"+":"+","-":"-","*":"*",x:"*",X:"*","/":"frac","(":"group",")":"close","^":"pow",r:"sqrt",R:"sqrt","!":"fact",ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down",Backspace:"del",Enter:"check","=":"check"};function X(){let e=(0,r.useMemo)(()=>Ee(new Date),[]),[t,o]=(0,r.useState)(null),[s,i]=(0,r.useState)(!1),[a,u]=(0,r.useReducer)(Pe,null,()=>({level:"easy",plays:te(),cursor:{path:[],index:0},note:null})),l=(0,r.useRef)(null),n=(0,r.useRef)(null),p=(0,r.useRef)(!1);(0,r.useEffect)(()=>{let c=!0;return be(e).then(f=>{if(!c)return;let y=Ce(e);y&&u({type:"load",plays:y}),p.current=!0,o(f)}).catch(()=>c&&i(!0)),()=>{c=!1}},[e]),(0,r.useEffect)(()=>{p.current&&Le(e,a.plays)},[e,a.plays]);let h=q.find(c=>c.id===a.level);(0,r.useEffect)(()=>{document.documentElement.style.setProperty("--h",String(h.hue))},[h.hue]);let d=t?.find(c=>c.level===a.level)??null,m=a.plays[a.level];(0,r.useEffect)(()=>{let c=n.current,f=c?.querySelector(".caret, .empty.on");if(!c||!f)return;let y=c.getBoundingClientRect(),b=f.getBoundingClientRect();b.left<y.left+20?c.scrollLeft-=y.left+20-b.left:b.right>y.right-20&&(c.scrollLeft+=b.right-(y.right-20))},[a.cursor,m.root]),(0,r.useEffect)(()=>{d&&!m.solved&&l.current?.focus({preventScroll:!0})},[d,m.solved]);let D=a.note?.tone==="bad"?a.note.stamp:0;if((0,r.useEffect)(()=>{!D||window.matchMedia("(prefers-reduced-motion: reduce)").matches||l.current?.animate([{transform:"translateX(0)"},{transform:"translateX(-6px)"},{transform:"translateX(5px)"},{transform:"translateX(-3px)"},{transform:"translateX(0)"}],{duration:320,easing:"ease"})},[D]),s)return r.default.createElement(F,{level:a.level},r.default.createElement("p",{className:"lead"},"N\xE3o foi poss\xEDvel carregar os desafios de hoje. Recarregue a p\xE1gina para tentar de novo."));if(!t||!d)return r.default.createElement(F,{level:a.level},r.default.createElement("p",{className:"lead",role:"status"},"Buscando os desafios de hoje\u2026"));let L=c=>u({type:"key",key:c,puzzle:d}),w=c=>{L(c),l.current?.focus({preventScroll:!0})},S=G(m.root),N=m.root.length?Z(m.root):null,le=N?.ok===!0&&R(N.value,d.target)&&S===d.count,j=q.every(c=>a.plays[c.id].solved),B=q.find(c=>!a.plays[c.id].solved),ce=c=>{if(c.metaKey||c.ctrlKey||c.altKey)return;if(/^[0-9]$/.test(c.key)){c.preventDefault(),Number(c.key)===d.digit?L("digit"):u({type:"wrongDigit",puzzle:d});return}let f=Be[c.key];f&&(c.preventDefault(),L(f))},ue=new Intl.DateTimeFormat("pt-BR",{weekday:"long",day:"numeric",month:"long"}).format(new Date);return r.default.createElement(F,{level:a.level,digit:d.digit},r.default.createElement("header",{className:"top"},r.default.createElement("span",{className:"brand"},"algarismos"),r.default.createElement("time",{dateTime:e},ue)),r.default.createElement("nav",{className:"levels",role:"tablist","aria-label":"N\xEDvel"},q.map(c=>r.default.createElement("button",{key:c.id,role:"tab","aria-selected":c.id===a.level,className:"level",onClick:()=>u({type:"level",level:c.id})},c.label,a.plays[c.id].solved&&r.default.createElement("svg",{className:"tick",viewBox:"0 0 16 16","aria-label":"resolvido"},r.default.createElement("path",{d:"M3 8.5l3.2 3.2L13 4.8"}))))),r.default.createElement("section",{className:"brief","aria-live":"polite"},r.default.createElement("p",{className:"ask"},"Forme"),r.default.createElement("p",{className:"target"},d.target),r.default.createElement("p",{className:"ask"},"com ",W[d.count]??d.count," algarismos ",d.digit),r.default.createElement("div",{className:"tiles"+(S>d.count?" over":""),role:"img","aria-label":`${S} de ${d.count} usados`},Array.from({length:d.count},(c,f)=>r.default.createElement("span",{key:f,className:"tile"+(f<S?" used":"")},d.digit)),S>d.count&&r.default.createElement("span",{className:"extra"},"+",S-d.count))),r.default.createElement("div",{ref:l,className:"editor"+(m.solved?" solved":""),tabIndex:m.solved?-1:0,role:"textbox","aria-label":"Sua conta: "+(C(m.root)||"vazia"),"aria-readonly":m.solved,onKeyDown:ce,onPointerDown:c=>{if(m.solved)return;let f=c.currentTarget.querySelector(".row").getBoundingClientRect();u({type:"place",cursor:c.clientX<f.left?{path:[],index:0}:I(m.root)})}},r.default.createElement("div",{className:"scroll",ref:n},r.default.createElement("div",{className:"expr"},r.default.createElement(ae,{row:m.root,path:[],cursor:m.solved?null:a.cursor,onPlace:m.solved?void 0:c=>u({type:"place",cursor:c})}),!m.root.length&&r.default.createElement("span",{className:"hint"},"Escreva sua conta aqui"))),N?.ok&&r.default.createElement("output",{className:"value"+(le||m.solved?" hit":"")},ee(N.value))),r.default.createElement("p",{className:"status"+(a.note?" "+a.note.tone:""),role:"status"},a.note?.text??(m.solved?"":N&&!N.ok?N.error:"\xA0")),m.solved?r.default.createElement("section",{className:"done"},r.default.createElement("h2",null,j?"Os tr\xEAs de hoje est\xE3o resolvidos":"Resolvido"),r.default.createElement("p",null,m.tries===1?"De primeira.":`Em ${m.tries} tentativas.`," ",j&&r.default.createElement($e,null)),B&&r.default.createElement("button",{className:"primary",onClick:()=>u({type:"level",level:B.id})},"Jogar o ",B.label)):r.default.createElement("div",{className:"pad"},Te.map(({key:c,label:f,text:y})=>{let b=re[c],$=!!b&&T[a.level]<T[b];return r.default.createElement("button",{key:c,className:"key"+(c==="digit"?" digit":"")+($?" locked":""),"aria-label":c==="digit"?`Algarismo ${d.digit}`:f,"aria-disabled":$,title:$&&b?oe[b]:f,onPointerDown:de=>de.preventDefault(),onClick:()=>w(c)},c==="digit"?d.digit:Ae[c]??y)}),r.default.createElement("button",{className:"link",onClick:()=>w("clear"),disabled:!m.root.length},"Limpar"),r.default.createElement("button",{className:"primary",onClick:()=>w("check")},"Conferir")))}function F({level:e,digit:t,children:o}){return r.default.createElement("div",{className:"stage","data-level":e},r.default.createElement("style",null,Ke),t!==void 0&&r.default.createElement("span",{className:"ghost","aria-hidden":"true"},t),r.default.createElement("main",{className:"col"},o))}function $e(){let[e,t]=(0,r.useState)(()=>Date.now());(0,r.useEffect)(()=>{let a=setInterval(()=>t(Date.now()),1e3);return()=>clearInterval(a)},[]);let o=new Date(e);o.setHours(24,0,0,0);let s=Math.max(0,Math.floor((o.getTime()-e)/1e3)),i=a=>String(a).padStart(2,"0");return r.default.createElement("span",null,"Novos desafios em ",r.default.createElement("span",{className:"clock"},i(Math.floor(s/3600)),":",i(Math.floor(s/60)%60),":",i(s%60)),".")}var Ke=`
+@import url("https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&family=Schibsted+Grotesk:wght@400;500;600&display=swap");
+
+@property --h { syntax: "<number>"; inherits: true; initial-value: 168; }
+
+:root {
+  --h: 168;
+  --bg: oklch(94.5% 0.045 var(--h));
+  --bg-2: oklch(89% 0.085 calc(var(--h) + 28));
+  --ink: oklch(23% 0.035 var(--h));
+  --muted: oklch(45% 0.035 var(--h));
+  --line: oklch(23% 0.035 var(--h) / 0.2);
+  --accent: oklch(47% 0.13 var(--h));
+  --on-accent: oklch(98% 0.012 var(--h));
+  --key: oklch(100% 0 0 / 0.52);
+  --ghost: oklch(47% 0.13 var(--h) / 0.1);
+  --bad: oklch(48% 0.19 28);
+  --math: "STIX Two Text", "Cambria Math", "Times New Roman", serif;
+  --ui: "Schibsted Grotesk", system-ui, -apple-system, "Segoe UI", sans-serif;
+  transition: --h 0.9s ease;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: oklch(19% 0.035 var(--h));
+    --bg-2: oklch(28% 0.085 calc(var(--h) + 28));
+    --ink: oklch(95% 0.02 var(--h));
+    --muted: oklch(74% 0.035 var(--h));
+    --line: oklch(95% 0.02 var(--h) / 0.2);
+    --accent: oklch(82% 0.12 var(--h));
+    --on-accent: oklch(18% 0.035 var(--h));
+    --key: oklch(100% 0 0 / 0.07);
+    --ghost: oklch(82% 0.12 var(--h) / 0.08);
+    --bad: oklch(76% 0.15 28);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: oklch(19% 0.035 var(--h));
+  --bg-2: oklch(28% 0.085 calc(var(--h) + 28));
+  --ink: oklch(95% 0.02 var(--h));
+  --muted: oklch(74% 0.035 var(--h));
+  --line: oklch(95% 0.02 var(--h) / 0.2);
+  --accent: oklch(82% 0.12 var(--h));
+  --on-accent: oklch(18% 0.035 var(--h));
+  --key: oklch(100% 0 0 / 0.07);
+  --ghost: oklch(82% 0.12 var(--h) / 0.08);
+  --bad: oklch(76% 0.15 28);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--ui); -webkit-font-smoothing: antialiased; }
+p, h2 { margin: 0; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* \u2500\u2500 Palco e fundo \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.stage {
+  position: relative; min-height: 100%; overflow: hidden;
+  background: radial-gradient(130% 75% at 88% -5%, var(--bg-2), transparent 62%), var(--bg);
+}
+.ghost {
+  position: absolute; right: -0.04em; bottom: -0.1em; z-index: 0;
+  font: 600 clamp(20rem, 105vmin, 62rem) / 0.74 var(--math);
+  color: var(--ghost); pointer-events: none; user-select: none;
+  transition: transform 1s cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+[data-level="medium"] .ghost { transform: translate(-10%, -26%) rotate(-9deg); }
+[data-level="hard"] .ghost { transform: translate(-22%, -48%) rotate(13deg) scale(1.18); }
+
+.col {
+  position: relative; z-index: 1;
+  width: min(100%, 31rem); margin: 0 auto;
+  padding: 1rem 1.25rem 1.5rem;
+  display: flex; flex-direction: column;
+}
+@media (min-width: 62rem) {
+  .col { margin-left: max(7vw, calc(50vw - 36rem)); padding-top: 2rem; }
+}
+.lead { margin-top: 30vh; font-size: 1.05rem; color: var(--muted); }
+
+/* \u2500\u2500 Cabe\xE7alho e n\xEDveis \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.top { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; font-size: 0.875rem; color: var(--muted); }
+.brand { font: italic 400 1.3rem/1 var(--math); color: var(--ink); letter-spacing: -0.01em; }
+.levels { display: flex; gap: 1.5rem; margin-top: 1.5rem; border-bottom: 1px solid var(--line); }
+.level {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.6rem 0; margin-bottom: -1px; min-height: 44px;
+  font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent;
+}
+.level[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); }
+.tick { width: 0.9rem; height: 0.9rem; fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* \u2500\u2500 Enunciado \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.brief { margin-top: clamp(1rem, 3.5vh, 2rem); }
+.ask { font-size: 1.0625rem; color: var(--muted); }
+.target {
+  font: 600 clamp(4.5rem, 21vw, 7rem) / 0.95 var(--math);
+  letter-spacing: -0.035em; margin: 0.04em 0 0.1em -0.03em;
+  font-variant-numeric: lining-nums;
+}
+.tiles { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.75rem; }
+.tile {
+  display: grid; place-items: center; width: 2rem; height: 2.25rem; border-radius: 0.5rem;
+  font: 600 1.2rem/1 var(--math);
+  background: var(--accent); color: var(--on-accent);
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.tile.used { background: transparent; color: var(--muted); box-shadow: inset 0 0 0 1.5px var(--line); }
+.extra { font-weight: 600; color: var(--bad); margin-left: 0.2rem; }
+.tiles.over .tile { box-shadow: inset 0 0 0 1.5px var(--bad); color: var(--bad); }
+
+/* \u2500\u2500 Editor \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.editor {
+  display: flex; align-items: center; gap: 0.75rem;
+  margin-top: clamp(1rem, 3vh, 1.75rem); min-height: 6.25rem;
+  border-bottom: 2px solid var(--ink);
+  font: 400 clamp(1.9rem, 8.2vw, 2.6rem) / 1.25 var(--math);
+  cursor: text; outline: none; touch-action: manipulation;
+}
+.editor:focus-visible { border-bottom-color: var(--accent); }
+.editor.solved { cursor: default; border-bottom-color: var(--accent); }
+.scroll { flex: 1; min-width: 0; display: flex; overflow-x: auto; scrollbar-width: none; padding: 0.5em 0; }
+.scroll::-webkit-scrollbar { display: none; }
+.expr { position: relative; margin: auto 0; padding-right: 0.4em; white-space: nowrap; }
+.hint { margin-left: 0.5rem; vertical-align: middle; font: 400 1rem var(--ui); color: var(--muted); pointer-events: none; }
+.value { flex: none; font-size: 0.56em; color: var(--muted); font-variant-numeric: tabular-nums; }
+.value.hit { color: var(--accent); font-weight: 600; }
+
+.row { display: inline-block; white-space: nowrap; min-width: 0.3em; min-height: 1em; }
+.tk { display: inline-block; }
+.tk.op { margin: 0 0.24em; }
+.frac { display: inline-grid; grid-template-rows: 1fr auto 1fr; justify-items: center; vertical-align: middle; margin: 0 0.1em; }
+.frac .frac { font-size: 0.86em; }
+.num { align-self: end; padding: 0 0.18em 0.06em; }
+.den { align-self: start; padding: 0.06em 0.18em 0; }
+.bar { justify-self: stretch; border-top: 0.055em solid currentColor; }
+.pow { display: inline-block; font-size: 0.62em; vertical-align: 0.82em; margin-left: 0.06em; }
+.pow.hi { vertical-align: top; }
+.sqrt, .group { display: inline-flex; align-items: stretch; }
+.sqrt { margin: 0 0.06em; }
+.sqrt-body { align-self: baseline; border-top: 0.055em solid currentColor; padding: 0.1em 0.12em 0 0.08em; }
+.group-body { align-self: baseline; padding: 0.04em 0.02em; }
+.stretch { position: relative; flex: none; }
+.stretch svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.stretch path { fill: none; stroke: currentColor; stroke-width: 0.055em; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.rad { width: 0.58em; }
+.paren { width: 0.3em; }
+.paren.r { transform: scaleX(-1); }
+
+.caret { display: inline-block; width: 0; height: 1.05em; vertical-align: -0.2em; position: relative; }
+.caret::after { content: ""; position: absolute; left: -1px; top: 0; bottom: 0; width: 2px; border-radius: 1px; background: var(--accent); animation: blink 1.1s steps(1) infinite; }
+.editor:not(:focus) .caret::after { animation: none; opacity: 0.45; }
+.empty { display: inline-block; width: 0.6em; height: 0.84em; vertical-align: -0.08em; border: 1.5px dashed var(--line); border-radius: 0.12em; }
+.empty.on { border: 1.5px solid var(--accent); background: color-mix(in oklch, var(--accent) 14%, transparent); }
+@keyframes blink { 50% { opacity: 0; } }
+
+.status { min-height: 1.4rem; margin-top: 0.5rem; font-size: 0.9375rem; line-height: 1.4; color: var(--muted); }
+.status.bad { color: var(--bad); }
+
+/* \u2500\u2500 Teclado \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.pad { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-top: 0.75rem; }
+.key {
+  display: grid; place-items: center; height: clamp(3rem, 7.4vh, 3.6rem); border-radius: 0.9rem;
+  background: var(--key); font: 400 1.5rem/1 var(--math);
+  transition: transform 0.08s, background 0.15s;
+}
+.key:active { transform: scale(0.94); }
+.key svg { width: 1.6rem; height: 1.6rem; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; }
+.key.digit { background: var(--accent); color: var(--on-accent); font-weight: 600; font-size: 1.75rem; }
+.key.locked { opacity: 0.32; }
+.link { grid-column: span 1; height: 3.25rem; margin-top: 0.25rem; font-weight: 500; color: var(--muted); border-radius: 0.9rem; }
+.link:disabled { opacity: 0.4; cursor: default; }
+.primary {
+  grid-column: span 3; height: 3.25rem; margin-top: 0.25rem; padding: 0 1.5rem; border-radius: 0.9rem;
+  background: var(--ink); color: var(--bg); font-weight: 600; font-size: 1.0625rem;
+  transition: transform 0.08s;
+}
+.primary:active { transform: scale(0.98); }
+
+/* \u2500\u2500 Resolvido \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500 */
+.done { margin-top: 1rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.5rem; animation: rise 0.45s cubic-bezier(0.2, 0.7, 0.1, 1); }
+.done h2 { font: 600 1.75rem/1.15 var(--math); letter-spacing: -0.01em; }
+.done p { color: var(--muted); line-height: 1.5; }
+.done .primary { margin-top: 0.75rem; }
+.clock { font-variant-numeric: tabular-nums; color: var(--ink); font-weight: 500; }
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  :root, .ghost, .tile, .key, .primary { transition: none; }
+  .caret::after, .done { animation: none; }
+}
+`;(0,ie.createRoot)(document.getElementById("root")).render(se.default.createElement(X,null));})();
+
+</script>
+</body>
+</html>

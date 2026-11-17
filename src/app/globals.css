@@ -1,0 +1,84 @@
+@property --h {
+   syntax: '<number>';
+   inherits: true;
+   initial-value: 168;
+}
+
+:root {
+   --h: 168;
+   --bg: oklch(94.5% 0.045 var(--h));
+   --bg-2: oklch(89% 0.085 calc(var(--h) + 28));
+   --ink: oklch(23% 0.035 var(--h));
+   --muted: oklch(45% 0.035 var(--h));
+   --line: oklch(23% 0.035 var(--h) / 0.2);
+   --accent: oklch(47% 0.13 var(--h));
+   --on-accent: oklch(98% 0.012 var(--h));
+   --key: oklch(100% 0 0 / 0.52);
+   --ghost: oklch(47% 0.13 var(--h) / 0.1);
+   --bad: oklch(48% 0.19 28);
+   --math: 'STIX Two Text', 'Cambria Math', 'Times New Roman', serif;
+   --ui: 'Schibsted Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+   transition: --h 0.9s ease;
+}
+@media (prefers-color-scheme: dark) {
+   :root:not([data-theme='light']) {
+      --bg: oklch(19% 0.035 var(--h));
+      --bg-2: oklch(28% 0.085 calc(var(--h) + 28));
+      --ink: oklch(95% 0.02 var(--h));
+      --muted: oklch(74% 0.035 var(--h));
+      --line: oklch(95% 0.02 var(--h) / 0.2);
+      --accent: oklch(82% 0.12 var(--h));
+      --on-accent: oklch(18% 0.035 var(--h));
+      --key: oklch(100% 0 0 / 0.07);
+      --ghost: oklch(82% 0.12 var(--h) / 0.08);
+      --bad: oklch(76% 0.15 28);
+   }
+}
+:root[data-theme='dark'] {
+   --bg: oklch(19% 0.035 var(--h));
+   --bg-2: oklch(28% 0.085 calc(var(--h) + 28));
+   --ink: oklch(95% 0.02 var(--h));
+   --muted: oklch(74% 0.035 var(--h));
+   --line: oklch(95% 0.02 var(--h) / 0.2);
+   --accent: oklch(82% 0.12 var(--h));
+   --on-accent: oklch(18% 0.035 var(--h));
+   --key: oklch(100% 0 0 / 0.07);
+   --ghost: oklch(82% 0.12 var(--h) / 0.08);
+   --bad: oklch(76% 0.15 28);
+}
+
+*,
+*::before,
+*::after {
+   box-sizing: border-box;
+}
+html,
+body,
+#root {
+   height: 100%;
+}
+body {
+   margin: 0;
+   background: var(--bg);
+   color: var(--ink);
+   font-family: var(--ui);
+   -webkit-font-smoothing: antialiased;
+}
+p,
+h2 {
+   margin: 0;
+}
+button {
+   font: inherit;
+   color: inherit;
+   background: none;
+   border: 0;
+   padding: 0;
+   cursor: pointer;
+   -webkit-tap-highlight-color: transparent;
+   touch-action: manipulation;
+}
+:focus-visible {
+   outline: 2px solid var(--accent);
+   outline-offset: 3px;
+}

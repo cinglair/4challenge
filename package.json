@@ -1,0 +1,39 @@
+{
+   "name": "4challenge",
+   "private": true,
+   "version": "0.1.0",
+   "type": "module",
+   "scripts": {
+      "dev": "vite",
+      "build": "tsc --noEmit && vite build",
+      "preview": "vite preview",
+      "typecheck": "tsc --noEmit",
+      "lint": "eslint ./src",
+      "lint:fix": "eslint ./src --fix",
+      "fix": "prettier \"**/*.+(ts|tsx|css|json|md)\" --write",
+      "test": "vitest run",
+      "test:watch": "vitest"
+   },
+   "dependencies": {
+      "@tanstack/react-query": "^5.107.2",
+      "react": "^19.3.1",
+      "react-dom": "^19.3.1"
+   },
+   "devDependencies": {
+      "@eslint/js": "^10.0.1",
+      "@types/node": "^26.6.6",
+      "@types/react": "^19.3.0",
+      "@types/react-dom": "^19.3.0",
+      "@vitejs/plugin-react": "^6.3.0",
+      "eslint": "^10.15.0",
+      "eslint-config-prettier": "^10.1.8",
+      "eslint-plugin-react-hooks": "^7.1.1",
+      "eslint-plugin-react-refresh": "^0.5.8",
+      "globals": "^17.14.0",
+      "prettier": "^3.10.1",
+      "typescript": "^6",
+      "typescript-eslint": "^8.73.0",
+      "vite": "^8.3.8",
+      "vitest": "^5.1.0"
+   }
+}
