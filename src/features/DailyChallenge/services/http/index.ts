@@ -1,18 +1,46 @@
-import { MOCK_DB } from '../../mocks/daily-puzzles'
-import type { DailyPuzzleDTO } from '../DTO'
+import type { DailyPuzzleDTO, PuzzleHintDTO } from '../DTO'
+import type { Level } from '../models'
 
-const MOCK_LEVELS = ['easy', 'medium', 'hard'] as const
+/** Lê a tabela `daily_puzzles` pela API REST do Supabase. */
+async function selectDailyPuzzles<T>(query: Record<string, string>) {
+   const url = import.meta.env.VITE_SUPABASE_URL
+   const key = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
+   if (!url || !key)
+      throw new Error(
+         'Defina VITE_SUPABASE_URL e VITE_SUPABASE_PUBLISHABLE_KEY (veja o README).'
+      )
 
-/** Troque o corpo desta função pela chamada real (ex.: GET /api/puzzles?date=…). */
+   const response = await fetch(
+      `${url}/rest/v1/daily_puzzles?${new URLSearchParams(query)}`,
+      { headers: { apikey: key } }
+   )
+   if (!response.ok)
+      throw new Error(`Falha ao buscar os desafios (HTTP ${response.status}).`)
+   return (await response.json()) as T[]
+}
+
+/** Os três desafios de um dia (AAAA-MM-DD). */
 export async function fetchDailyPuzzles(
    date: string
 ): Promise<DailyPuzzleDTO[]> {
-   await new Promise((r) => setTimeout(r, 300)) // simula a latência da rede
-   const day = Math.floor(Date.parse(date + 'T00:00:00Z') / 86_400_000)
-   return MOCK_LEVELS.map((level) => {
-      const list = MOCK_DB[level]
-      const [target, digit, count] =
-         list[((day % list.length) + list.length) % list.length]
-      return { id: `${date}-${level}`, date, level, target, digit, count }
+   const puzzles = await selectDailyPuzzles<DailyPuzzleDTO>({
+      select: 'date,level,target,digit,count',
+      date: `eq.${date}`,
    })
+   if (puzzles.length === 0) throw new Error(`Não há desafios para ${date}.`)
+   return puzzles
+}
+
+/** A dica de um desafio, buscada só quando o jogador pede. */
+export async function fetchPuzzleHint(
+   date: string,
+   level: Level
+): Promise<PuzzleHintDTO> {
+   const [found] = await selectDailyPuzzles<PuzzleHintDTO>({
+      select: 'hint',
+      date: `eq.${date}`,
+      level: `eq.${level}`,
+   })
+   if (!found) throw new Error(`Não há dica para ${date} (${level}).`)
+   return found
 }

@@ -1,7 +1,8 @@
 import type { Level } from '../services/models'
 
 /**
- * Mock provisório no lugar do banco. Cada trio é [alvo, algarismo, quantidade].
+ * Desafios de exemplo usados nos testes do solver (o app lê os desafios do
+ * Supabase). Cada trio é [alvo, algarismo, quantidade].
  * Todos foram conferidos por um solver: "easy" sai só com + − × ÷;
  * "medium" exige potência ou raiz; "hard" exige fatorial.
  */

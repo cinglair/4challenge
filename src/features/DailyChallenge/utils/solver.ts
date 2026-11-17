@@ -5,8 +5,9 @@ import { evaluate, isTarget } from './evaluate'
 
 /*
  * Solver dos desafios: monta, de baixo para cima, todas as contas possíveis
- * com 1, 2, … n algarismos e guarda a mais simples para cada valor. É a
- * fonte das dicas enquanto a solução não vem do banco.
+ * com 1, 2, … n algarismos e guarda a mais simples para cada valor. É usado
+ * por scripts/generate-daily-puzzles.mjs para conferir os desafios e gerar as
+ * dicas gravadas no banco; o app só lê o resultado pela API.
  */
 
 interface Expr {

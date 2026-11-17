@@ -14,15 +14,8 @@ import {
    StatusMessage,
 } from '../components'
 import { useChallengeInput, useGame, useLevelHue } from '../hooks'
-import { useDailyPuzzlesQuery } from '../services'
-import {
-   LEVELS,
-   countDigits,
-   evaluate,
-   isTarget,
-   maskSolution,
-   solvePuzzle,
-} from '../utils'
+import { useDailyPuzzlesQuery, usePuzzleHintQuery } from '../services'
+import { LEVELS, countDigits, evaluate, isTarget } from '../utils'
 import { DailyChallengeView } from './view'
 
 export function DailyChallengeController() {
@@ -69,13 +62,10 @@ function ChallengeSession({
    useLevelHue(game.level)
    const { tap, onKeyDown } = useChallengeInput({ puzzle, dispatch, editorRef })
 
-   // Dica: parte de uma solução, calculada só quando o jogador pede.
+   // Dica: o começo de uma solução, buscado no banco só quando o jogador pede.
    const hinted = !!play.hinted && !play.solved
-   const hint = useMemo(() => {
-      if (!hinted || !puzzle) return undefined
-      const solution = solvePuzzle(puzzle)
-      return solution ? maskSolution(solution) : null
-   }, [hinted, puzzle])
+   const hintQuery = usePuzzleHintQuery(date, game.level, hinted)
+   const hint = !hinted ? undefined : hintQuery.isError ? null : hintQuery.data
 
    const header = (
       <ChallengeHeader date={date} today={today} onDateChange={onDateChange} />

@@ -54,6 +54,8 @@ export interface Play {
    tries: number
    /** A dica deste nível está à mostra. */
    hinted: boolean
+   /** O jogador já pediu a dica deste nível (não volta a ser falso). */
+   usedHint?: boolean
 }
 export type Plays = Record<Level, Play>
 
