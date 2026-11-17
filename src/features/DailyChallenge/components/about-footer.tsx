@@ -9,10 +9,7 @@ export function AboutFooter() {
             height={191}
             loading="lazy"
          />
-         <p>
-            Um desafio de matemática por dia: forme o número-alvo usando um
-            único algarismo.
-         </p>
+         <p>Desafios diários de matemática</p>
       </footer>
    )
 }

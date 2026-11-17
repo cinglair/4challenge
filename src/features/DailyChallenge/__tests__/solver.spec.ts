@@ -6,6 +6,7 @@ import type { MathNode, Row } from '../types'
 import {
    countDigits,
    evaluate,
+   hintBudget,
    maskSolution,
    solvePuzzle,
    toText,
@@ -58,43 +59,76 @@ describe('solvePuzzle', () => {
 })
 
 describe('maskSolution', () => {
-   it('mostra o começo da conta e esconde o resto', () => {
+   const HOLE: MathNode = { k: 'hole' }
+
+   it('mostra um pedaço da conta e esconde o resto', () => {
       const row: Row = [d(9), op('+'), { k: 'frac', num: [d(9)], den: [d(9)] }]
-      expect(maskSolution(row)).toEqual([d(9), op('+'), { k: 'hole' }])
+      expect(maskSolution(row)).toEqual([d(9), op('+'), HOLE])
    })
 
-   it('prefere cortar numa soma a cortar numa multiplicação', () => {
+   it('mostra a parcela que cabe na dica, mesmo que não seja a primeira', () => {
       const row: Row = [d(4), op('*'), d(4), op('-'), d(4)]
-      expect(toText(maskSolution(row))).toBe('4 vezes 4 menos  alguma coisa ')
+      expect(toText(maskSolution(row))).toBe(' alguma coisa  menos 4')
    })
 
-   it('esconde o denominador, o expoente ou o miolo quando não há operador solto', () => {
+   it('junta as parcelas escondidas numa lacuna só', () => {
+      // 5 + 5 + 5 + 5 + 5: a dica pode mostrar dois dos cinco algarismos
+      const row: Row = [
+         d(5),
+         op('+'),
+         d(5),
+         op('+'),
+         d(5),
+         op('+'),
+         d(5),
+         op('+'),
+         d(5),
+      ]
+      expect(maskSolution(row)).toEqual([d(5), op('+'), d(5), op('+'), HOLE])
+   })
+
+   it('num termo só, mostra a parte menor da estrutura', () => {
       expect(
          maskSolution([{ k: 'frac', num: [d(8), d(8)], den: [d(8)] }])
-      ).toEqual([{ k: 'frac', num: [d(8), d(8)], den: [{ k: 'hole' }] }])
+      ).toEqual([{ k: 'frac', num: [HOLE], den: [d(8)] }])
       expect(maskSolution([d(2), { k: 'pow', exp: [d(2), d(2)] }])).toEqual([
          d(2),
-         { k: 'pow', exp: [{ k: 'hole' }] },
+         { k: 'pow', exp: [HOLE] },
       ])
       expect(
          maskSolution([
             { k: 'group', body: [d(3), op('+'), d(3)] },
             { k: 'fact' },
          ])
-      ).toEqual([
-         { k: 'group', body: [d(3), op('+'), { k: 'hole' }] },
-         { k: 'fact' },
+      ).toEqual([{ k: 'group', body: [d(3), op('+'), HOLE] }, { k: 'fact' }])
+   })
+
+   it('não abre a estrutura de parcelas grandes que estão dentro de outra conta', () => {
+      // (4⁴ − 44) / 4 → ▢ / 4, sem entregar a potência nem a subtração
+      const row: Row = [
+         {
+            k: 'frac',
+            num: [d(4), { k: 'pow', exp: [d(4)] }, op('-'), d(4), d(4)],
+            den: [d(4)],
+         },
+      ]
+      expect(maskSolution(row)).toEqual([
+         { k: 'frac', num: [HOLE], den: [d(4)] },
       ])
    })
 
-   it('nunca entrega a solução inteira', () => {
+   it('entrega no máximo metade dos algarismos, e nunca só uma lacuna', () => {
       for (const level of Object.keys(MOCK_DB) as Level[])
          for (const [target, digit, count] of MOCK_DB[level]) {
             const hint = maskSolution(
                solvePuzzle({ target, digit, count, level })!
             )
-            expect(kinds(hint)).toContain('hole')
-            expect(countDigits(hint)).toBeLessThan(count)
+            const label = `${level} ${target} (${count}×${digit}): ${toText(hint)}`
+            expect(kinds(hint), label).toContain('hole')
+            expect(countDigits(hint), label).toBeLessThanOrEqual(
+               hintBudget(count)
+            )
+            expect(countDigits(hint), label).toBeGreaterThan(0)
          }
    })
 })
