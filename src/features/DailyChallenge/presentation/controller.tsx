@@ -170,7 +170,8 @@ function ChallengeSession({
          actionsComponent={
             play.solved ? (
                <SolvedPanel
-                  tries={play.tries}
+                  level={game.level}
+                  date={date}
                   allSolved={allSolved}
                   showCountdown={date === today}
                   nextLevelLabel={nextLevel?.label}

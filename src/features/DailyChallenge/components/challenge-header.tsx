@@ -7,7 +7,7 @@ interface ChallengeHeaderProps {
    onDateChange: (date: string) => void
 }
 
-/** Cabeçalho: ajuda à esquerda, o nome no centro e o calendário à direita. */
+/** Cabeçalho: ajuda à esquerda e o calendário à direita (o nome fica no logo do rodapé). */
 export function ChallengeHeader({
    date,
    today,
@@ -16,9 +16,7 @@ export function ChallengeHeader({
    return (
       <header className="top">
          <HowToPlay />
-         <h1 className="brand">
-            algarism<span>.io</span>
-         </h1>
+         <h1 className="sr-only">algarism.io</h1>
          <ChallengeCalendar
             date={date}
             today={today}
