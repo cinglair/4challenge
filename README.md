@@ -39,7 +39,7 @@ yarn dev        # sobe o app em http://localhost:5173
 | Script           | O que faz                        |
 | ---------------- | -------------------------------- |
 | `yarn dev`       | servidor de desenvolvimento      |
-| `yarn build`     | checa os tipos e gera `dist/`    |
+| `yarn build`     | checa os tipos, gera `dist/` e pré-renderiza as páginas |
 | `yarn preview`   | serve o build de produção        |
 | `yarn test`      | roda os testes (Vitest)          |
 | `yarn lint`      | ESLint em `src/`                 |
@@ -48,9 +48,11 @@ yarn dev        # sobe o app em http://localhost:5173
 
 ## Desafios no banco
 
-A tabela `daily_puzzles` guarda um desafio por dia e nível, com a dica. O
-esquema está em `supabase/migrations/` e a carga atual (1º/11/2026 a
-30/04/2027) em `supabase/seed.sql`. Para gerar mais dias, conferidos pelo
+A tabela `daily_puzzles` guarda um desafio por dia e nível, com a dica e uma
+solução possível (mostrada quando o jogador desiste). O esquema está em
+`supabase/migrations/` e a carga atual (1º/11/2026 a 30/04/2027) em
+`supabase/seed.sql`; rodar a carga sobre dias que já existem só preenche a
+coluna `solution`. Para gerar mais dias, conferidos pelo
 solver do jogo:
 
 ```bash
@@ -58,6 +60,33 @@ node scripts/generate-daily-puzzles.mjs 2027-05-01 2027-08-31 > mais-dias.sql
 ```
 
 Os desafios só ficam legíveis pela API a partir da véspera do dia (UTC).
+
+## Páginas, SEO e anúncios
+
+O site tem a página inicial (o desafio de hoje), uma página por dia em
+`/desafio/AAAA-MM-DD/`, o arquivo em `/arquivo/` e as páginas institucionais
+(`/sobre/`, `/privacidade/`, `/termos/`, `/contato/`). O roteamento é um
+roteador mínimo em `src/shared/router`.
+
+Depois do `vite build`, `scripts/prerender.mjs` grava em `dist/` um HTML por
+página, com `<head>` próprio (título, descrição, canonical, Open Graph e
+JSON-LD) e o texto da página já no HTML, além do `sitemap.xml`. As páginas dos
+desafios saem do banco, só para os dias já liberados; por isso o site precisa
+de um build por dia. O workflow `.github/workflows/daily-build.yml` dispara
+esse build à meia-noite de Brasília se o repositório tiver o segredo
+`CLOUDFLARE_DEPLOY_HOOK` (a URL de um deploy hook da Cloudflare).
+
+Os textos institucionais ficam em `src/shared/site/pages.ts` e o e-mail de
+contato em `src/shared/site/index.ts` (`CONTACT_EMAIL`).
+
+Os anúncios (Google AdSense) ficam desligados até as variáveis abaixo serem
+definidas. Com elas, o build gera o `ads.txt`, o site passa a mostrar o aviso
+de cookies e, para quem aceita, um bloco de anúncio abaixo do jogo:
+
+```bash
+VITE_ADSENSE_CLIENT=ca-pub-0000000000000000   # identificador do editor
+VITE_ADSENSE_SLOT=0000000000                  # bloco de anúncio
+```
 
 ## Organização de pastas
 
@@ -77,7 +106,12 @@ src/
 │       ├── mocks/            # desafios de exemplo para os testes
 │       ├── utils/            # árvore, avaliador, reducer, formatação, storage
 │       └── __tests__/
+│   └── Pages/                # páginas institucionais e a de "não encontrada"
 └── shared/                   # código reutilizável entre features
+    ├── site/                 # URL, rotas e textos (usados também no prerender)
+    ├── router/               # navegação e <head> por página
+    ├── ads/                  # AdSense e consentimento de cookies
+    └── ui/                   # moldura das páginas de texto e rodapé
 ```
 
 Os imports entre pastas usam o alias `@/` (raiz do projeto), por exemplo

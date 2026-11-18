@@ -1,0 +1,61 @@
+/* ── Aviso de cookies ──────────────────────────────────────────── */
+.consent {
+   position: fixed;
+   left: 50%;
+   bottom: max(0.75rem, env(safe-area-inset-bottom));
+   z-index: 30;
+   transform: translateX(-50%);
+   width: min(31rem, calc(100% - 1.5rem));
+   padding: 0.9rem 1rem;
+   display: flex;
+   flex-direction: column;
+   gap: 0.75rem;
+   border: 1px solid var(--line);
+   border-radius: 1.1rem;
+   background: oklch(99.6% 0.004 var(--h));
+   box-shadow: 0 12px 32px oklch(33% 0.03 var(--h) / 0.18);
+   font-size: 0.875rem;
+   line-height: 1.45;
+   color: var(--muted);
+}
+.consent a {
+   color: var(--primary);
+}
+.consent-actions {
+   display: flex;
+   justify-content: flex-end;
+   gap: 0.5rem;
+}
+.consent-actions button {
+   min-height: 2.5rem;
+   padding: 0 1.1rem;
+   border-radius: 0.8rem;
+   font-weight: 500;
+   color: var(--primary);
+}
+.consent-actions button:hover {
+   background: var(--accent-soft);
+}
+.consent-actions .consent-accept,
+.consent-actions .consent-accept:hover {
+   background: var(--primary);
+   color: var(--on-accent);
+   font-weight: 600;
+}
+
+/* ── Bloco de anúncio ──────────────────────────────────────────── */
+.ad {
+   /* altura reservada: o conteúdo em volta não se mexe quando o anúncio chega */
+   min-height: 17.5rem;
+   margin-top: 2rem;
+   display: flex;
+   flex-direction: column;
+   gap: 0.35rem;
+}
+.ad-label {
+   font-size: 0.6875rem;
+   letter-spacing: 0.06em;
+   text-transform: uppercase;
+   color: var(--muted);
+   text-align: center;
+}

@@ -1,5 +1,6 @@
 export * from './calendar'
 export * from './constants'
+export * from './copy'
 export * from './evaluate'
 export * from './expression-tree'
 export * from './format'

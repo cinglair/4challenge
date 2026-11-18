@@ -1,4 +1,4 @@
-import type { DailyPuzzleDTO, PuzzleHintDTO } from '../DTO'
+import type { DailyPuzzleDTO, PuzzleHintDTO, PuzzleSolutionDTO } from '../DTO'
 import type { Level } from '../models'
 
 /** Lê a tabela `daily_puzzles` pela API REST do Supabase. */
@@ -43,4 +43,30 @@ export async function fetchPuzzleHint(
    })
    if (!found) throw new Error(`Não há dica para ${date} (${level}).`)
    return found
+}
+
+/** Uma solução possível de um desafio, buscada só quando o jogador desiste. */
+export async function fetchPuzzleSolution(
+   date: string,
+   level: Level
+): Promise<PuzzleSolutionDTO> {
+   const [found] = await selectDailyPuzzles<PuzzleSolutionDTO>({
+      select: 'solution',
+      date: `eq.${date}`,
+      level: `eq.${level}`,
+   })
+   if (!found?.solution)
+      throw new Error(`Não há solução para ${date} (${level}).`)
+   return found
+}
+
+/** Todos os desafios já liberados até `today`, do dia mais recente ao mais antigo. */
+export async function fetchReleasedPuzzles(
+   today: string
+): Promise<DailyPuzzleDTO[]> {
+   return selectDailyPuzzles<DailyPuzzleDTO>({
+      select: 'date,level,target,digit,count',
+      date: `lte.${today}`,
+      order: 'date.desc',
+   })
 }

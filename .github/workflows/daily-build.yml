@@ -1,0 +1,26 @@
+# Refaz o site todo dia, logo depois da meia-noite de Brasília, para a página
+# do desafio do dia e o sitemap.xml entrarem no ar (as páginas são geradas no
+# build, por scripts/prerender.mjs).
+#
+# Precisa do segredo CLOUDFLARE_DEPLOY_HOOK no repositório, com a URL do
+# "deploy hook" criado no painel da Cloudflare. Sem ele, o passo só avisa.
+name: Build diário
+
+on:
+   schedule:
+      - cron: '5 3 * * *' # 03:05 UTC = 00:05 em Brasília
+   workflow_dispatch:
+
+jobs:
+   deploy:
+      runs-on: ubuntu-latest
+      steps:
+         - name: Dispara o build na Cloudflare
+           env:
+              DEPLOY_HOOK: ${{ secrets.CLOUDFLARE_DEPLOY_HOOK }}
+           run: |
+              if [ -z "$DEPLOY_HOOK" ]; then
+                 echo "Segredo CLOUDFLARE_DEPLOY_HOOK não definido; nada a fazer."
+                 exit 0
+              fi
+              curl --fail --silent --show-error -X POST "$DEPLOY_HOOK"

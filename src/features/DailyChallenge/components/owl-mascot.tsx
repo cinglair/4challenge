@@ -1,9 +1,9 @@
 /** `cheer` é a comemoração animada; `happy` é só o rosto contente, parado. */
-export type OwlMood = 'idle' | 'happy' | 'cheer' | 'oops'
+export type OwlMood = 'idle' | 'happy' | 'cheer' | 'oops' | 'cry'
 
 /**
- * Mascote do jogo, pousada num galho: fica observando, comemora o acerto
- * e lamenta o erro.
+ * Mascote do jogo, pousada num galho: fica observando, comemora o acerto,
+ * lamenta o erro e chora quando o jogador desiste e pede a solução.
  */
 export function OwlMascot({ mood = 'idle' }: { mood?: OwlMood }) {
    return (
@@ -113,6 +113,19 @@ export function OwlMascot({ mood = 'idle' }: { mood?: OwlMood }) {
                         d="M34 59q10-12 20 0M66 59q10-12 20 0"
                      />
                      <path className="owl-brow" d="M33 47l15-5M87 47l-15-5" />
+                     {/* olhos fechados e lágrimas: só quando chora */}
+                     <path
+                        className="owl-sob"
+                        d="M34 55q10 9 20 0M66 55q10 9 20 0"
+                     />
+                     <path
+                        className="owl-tear left"
+                        d="M37 63c-2.6 3.6-3.8 5.6-3.8 7.4a3.8 3.8 0 0 0 7.6 0c0-1.8-1.2-3.8-3.8-7.4z"
+                     />
+                     <path
+                        className="owl-tear right"
+                        d="M83 63c-2.6 3.6-3.8 5.6-3.8 7.4a3.8 3.8 0 0 0 7.6 0c0-1.8-1.2-3.8-3.8-7.4z"
+                     />
 
                      <path
                         className="owl-beak"

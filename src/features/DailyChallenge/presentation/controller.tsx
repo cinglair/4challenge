@@ -1,26 +1,56 @@
 import { useMemo, useRef, useState } from 'react'
 
-import { localISODate } from '@/src/shared'
+import {
+   ROUTES,
+   SITE_DESCRIPTION,
+   SITE_NAME,
+   SITE_TAGLINE,
+   formatLongDate,
+   localISODate,
+   navigate,
+   useDocumentHead,
+} from '@/src/shared'
 
 import {
    ChallengeBrief,
    ChallengeHeader,
+   ChallengeNotes,
    ExpressionEditor,
    Keypad,
    LevelTabs,
    OwlMascot,
+   RevealedPanel,
    SolvedPanel,
    Stage,
    StatusMessage,
 } from '../components'
 import { useChallengeInput, useGame, useLevelHue } from '../hooks'
-import { useDailyPuzzlesQuery, usePuzzleHintQuery } from '../services'
-import { LEVELS, countDigits, evaluate, isTarget } from '../utils'
+import {
+   useDailyPuzzlesQuery,
+   usePuzzleHintQuery,
+   usePuzzleSolutionQuery,
+} from '../services'
+import {
+   LEVELS,
+   challengeDescription,
+   challengeTitle,
+   countDigits,
+   evaluate,
+   isClosed,
+   isTarget,
+} from '../utils'
 import { DailyChallengeView } from './view'
 
-export function DailyChallengeController() {
+interface DailyChallengeControllerProps {
+   /** Dia da URL (/desafio/AAAA-MM-DD/); a página inicial joga o de hoje. */
+   date?: string
+}
+
+export function DailyChallengeController({
+   date: routeDate,
+}: DailyChallengeControllerProps) {
    const today = useMemo(() => localISODate(new Date()), [])
-   const [date, setDate] = useState(today)
+   const date = routeDate ?? today
    const [showResult, setShowResult] = useState(false)
 
    // A chave recomeça o jogo (estado e progresso salvo) a cada troca de dia.
@@ -29,7 +59,10 @@ export function DailyChallengeController() {
          key={date}
          date={date}
          today={today}
-         onDateChange={setDate}
+         isHome={!routeDate}
+         onDateChange={(d) =>
+            navigate(d === today ? ROUTES.home : ROUTES.challenge(d))
+         }
          showResult={showResult}
          onToggleResult={() => setShowResult((v) => !v)}
       />
@@ -39,6 +72,8 @@ export function DailyChallengeController() {
 interface ChallengeSessionProps {
    date: string
    today: string
+   /** Página inicial (e não a página própria de um dia). */
+   isHome: boolean
    onDateChange: (date: string) => void
    showResult: boolean
    onToggleResult: () => void
@@ -48,6 +83,7 @@ interface ChallengeSessionProps {
 function ChallengeSession({
    date,
    today,
+   isHome,
    onDateChange,
    showResult,
    onToggleResult,
@@ -63,17 +99,40 @@ function ChallengeSession({
    const { tap, onKeyDown } = useChallengeInput({ puzzle, dispatch, editorRef })
 
    // Dica: o começo de uma solução, buscado no banco só quando o jogador pede.
-   const hinted = !!play.hinted && !play.solved
+   const hinted = !!play.hinted && !isClosed(play)
    const hintQuery = usePuzzleHintQuery(date, game.level, hinted)
    const hint = !hinted ? undefined : hintQuery.isError ? null : hintQuery.data
 
+   // Solução: o jogador desistiu; a conta dele dá lugar a uma solução possível.
+   const revealed = !!play.revealed && !play.solved
+   const solutionQuery = usePuzzleSolutionQuery(date, game.level, revealed)
+
+   const longDate = formatLongDate(date)
+   const pageTitle = isHome
+      ? `${SITE_NAME} — ${SITE_TAGLINE}`
+      : challengeTitle(longDate)
+   useDocumentHead({
+      title: pageTitle,
+      fullTitle: isHome,
+      description: isHome
+         ? SITE_DESCRIPTION
+         : challengeDescription(longDate, puzzles ?? []),
+      path: isHome ? ROUTES.home : ROUTES.challenge(date),
+   })
+
    const header = (
-      <ChallengeHeader date={date} today={today} onDateChange={onDateChange} />
+      <ChallengeHeader
+         title={pageTitle}
+         date={date}
+         today={today}
+         onDateChange={onDateChange}
+      />
    )
+   const notes = <ChallengeNotes date={date} today={today} puzzles={puzzles} />
 
    if (isError) {
       return (
-         <Stage level={game.level}>
+         <Stage level={game.level} below={notes}>
             {header}
             <OwlMascot mood="oops" />
             <p className="lead">
@@ -86,7 +145,7 @@ function ChallengeSession({
 
    if (!puzzle) {
       return (
-         <Stage level={game.level}>
+         <Stage level={game.level} below={notes}>
             {header}
             <OwlMascot />
             <p className="lead" role="status">
@@ -96,19 +155,23 @@ function ChallengeSession({
       )
    }
 
-   const used = countDigits(play.root)
-   const live = play.root.length ? evaluate(play.root) : null
+   const root = revealed ? (solutionQuery.data ?? []) : play.root
+   const used = countDigits(root)
+   const live = root.length ? evaluate(root) : null
    const hit =
       live?.ok === true &&
       isTarget(live.value, puzzle.target) &&
       used === puzzle.count
    const allSolved = LEVELS.every((l) => game.plays[l.id].solved)
-   const nextLevel = LEVELS.find((l) => !game.plays[l.id].solved)
+   const nextLevel = LEVELS.find((l) => !isClosed(game.plays[l.id]))
+   const goToNextLevel = () =>
+      nextLevel && dispatch({ type: 'level', level: nextLevel.id })
    const badStamp = game.note?.tone === 'bad' ? game.note.stamp : 0
 
    return (
       <DailyChallengeView
          level={game.level}
+         notesComponent={notes}
          headerComponent={header}
          levelTabsComponent={
             <LevelTabs
@@ -127,7 +190,9 @@ function ChallengeSession({
                      ? game.celebrating
                         ? 'cheer'
                         : 'happy'
-                     : badStamp
+                     : revealed
+                       ? 'cry'
+                       : badStamp
                        ? 'oops'
                        : 'idle'
                }
@@ -137,11 +202,19 @@ function ChallengeSession({
             <ExpressionEditor
                editorRef={editorRef}
                puzzleId={puzzle.id}
-               root={play.root}
+               root={root}
                cursor={game.cursor}
                solved={play.solved}
+               revealed={revealed}
+               placeholder={
+                  !revealed
+                     ? undefined
+                     : solutionQuery.isError
+                       ? 'Não foi possível carregar a solução.'
+                       : 'Buscando a solução…'
+               }
                live={live}
-               hit={hit}
+               hit={hit && !revealed}
                showResult={showResult}
                onToggleResult={onToggleResult}
                badStamp={badStamp}
@@ -152,9 +225,15 @@ function ChallengeSession({
          statusComponent={
             <StatusMessage
                note={game.note}
-               solved={play.solved}
+               closed={isClosed(play)}
                live={live}
                hint={hint}
+               hinted={hinted}
+               onHint={() => {
+                  dispatch({ type: 'hint' })
+                  editorRef.current?.focus({ preventScroll: true })
+               }}
+               onReveal={() => dispatch({ type: 'reveal' })}
             />
          }
          actionsComponent={
@@ -165,21 +244,19 @@ function ChallengeSession({
                   allSolved={allSolved}
                   showCountdown={date === today}
                   nextLevelLabel={nextLevel?.label}
-                  onNextLevel={() =>
-                     nextLevel &&
-                     dispatch({ type: 'level', level: nextLevel.id })
-                  }
+                  onNextLevel={goToNextLevel}
+               />
+            ) : revealed ? (
+               <RevealedPanel
+                  showCountdown={date === today}
+                  nextLevelLabel={nextLevel?.label}
+                  onNextLevel={goToNextLevel}
                />
             ) : (
                <Keypad
                   level={game.level}
                   digit={puzzle.digit}
                   canClear={play.root.length > 0}
-                  hinted={hinted}
-                  onHint={() => {
-                     dispatch({ type: 'hint' })
-                     editorRef.current?.focus({ preventScroll: true })
-                  }}
                   onTap={tap}
                />
             )

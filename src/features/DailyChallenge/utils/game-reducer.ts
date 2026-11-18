@@ -1,4 +1,12 @@
-import type { Cursor, Doc, Game, GameAction, Note, Plays } from '../types'
+import type {
+   Cursor,
+   Doc,
+   Game,
+   GameAction,
+   Note,
+   Play,
+   Plays,
+} from '../types'
 import { LOCKED_NOTE, NEEDS, RANK } from './constants'
 import { evaluate, isTarget } from './evaluate'
 import {
@@ -19,6 +27,9 @@ const note = (text: string, tone: Note['tone'] = 'bad'): Note => ({
    tone,
    stamp: ++stamp,
 })
+
+/** Nível encerrado: resolvido ou com a solução à mostra. Não aceita mais jogadas. */
+export const isClosed = (play: Play) => play.solved || !!play.revealed
 
 export function createInitialGame(plays: Plays): Game {
    return {
@@ -41,10 +52,10 @@ export function gameReducer(g: Game, a: GameAction): Game {
             celebrating: false,
          }
       case 'place':
-         return g.plays[g.level].solved ? g : { ...g, cursor: a.cursor }
+         return isClosed(g.plays[g.level]) ? g : { ...g, cursor: a.cursor }
       case 'hint': {
          const play = g.plays[g.level]
-         if (play.solved) return g
+         if (isClosed(play)) return g
          return {
             ...g,
             plays: {
@@ -54,13 +65,26 @@ export function gameReducer(g: Game, a: GameAction): Game {
             note: null,
          }
       }
+      case 'reveal': {
+         // desistiu: fica guardado como não resolvido, com a solução à mostra
+         const play = g.plays[g.level]
+         if (isClosed(play)) return g
+         return {
+            ...g,
+            plays: {
+               ...g.plays,
+               [g.level]: { ...play, hinted: false, revealed: true },
+            },
+            note: null,
+         }
+      }
       case 'wrongDigit':
-         return g.plays[g.level].solved
+         return isClosed(g.plays[g.level])
             ? g
             : { ...g, note: note(`Neste desafio só vale o ${a.puzzle.digit}.`) }
       case 'key': {
          const play = g.plays[g.level]
-         if (play.solved) return g
+         if (isClosed(play)) return g
          const needs = NEEDS[a.key]
          if (needs && RANK[g.level] < RANK[needs])
             return { ...g, note: note(LOCKED_NOTE[needs], 'info') }

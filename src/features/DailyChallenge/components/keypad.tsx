@@ -7,8 +7,6 @@ interface KeypadProps {
    level: Level
    digit: number
    canClear: boolean
-   hinted: boolean
-   onHint: () => void
    onTap: (key: Key) => void
 }
 
@@ -16,8 +14,6 @@ export function Keypad({
    level,
    digit,
    canClear,
-   hinted,
-   onHint,
    onTap,
 }: KeypadProps) {
    return (
@@ -55,22 +51,6 @@ export function Keypad({
             disabled={!canClear}
          >
             Limpar
-         </button>
-         <button
-            className="link clue-toggle"
-            aria-pressed={hinted}
-            title={
-               hinted ? 'Esconder a dica' : 'Mostrar o começo de uma solução'
-            }
-            onPointerDown={
-               (e) => e.preventDefault() /* o foco fica no editor */
-            }
-            onClick={onHint}
-         >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-               <path d="M9.5 18h5M10.5 21h3M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z" />
-            </svg>
-            Dica
          </button>
          <button className="primary" onClick={() => onTap('check')}>
             Verificar resultado

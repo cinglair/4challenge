@@ -17,6 +17,10 @@ interface ExpressionEditorProps {
    root: Row
    cursor: Cursor
    solved: boolean
+   /** A conta à mostra é a solução pedida pelo jogador, não a dele. */
+   revealed?: boolean
+   /** Texto da caixa vazia. */
+   placeholder?: string
    live: Evaluation | null
    hit: boolean
    /** Mostra o valor da conta enquanto ela é montada. */
@@ -37,6 +41,8 @@ export function ExpressionEditor({
    root,
    cursor,
    solved,
+   revealed = false,
+   placeholder = 'Escreva sua conta aqui',
    live,
    hit,
    showResult,
@@ -47,6 +53,7 @@ export function ExpressionEditor({
 }: ExpressionEditorProps) {
    const scrollRef = useRef<HTMLDivElement>(null)
    const exprRef = useRef<HTMLDivElement>(null)
+   const locked = solved || revealed // não aceita mais jogadas
 
    // Conta comprida: a fonte encolhe aos poucos até caber; abaixo do mínimo, a caixa rola.
    useLayoutEffect(() => {
@@ -87,8 +94,8 @@ export function ExpressionEditor({
    }, [cursor, root])
 
    useEffect(() => {
-      if (!solved) editorRef.current?.focus({ preventScroll: true })
-   }, [editorRef, puzzleId, solved])
+      if (!locked) editorRef.current?.focus({ preventScroll: true })
+   }, [editorRef, puzzleId, locked])
 
    // Resposta errada: o editor balança uma vez.
    useEffect(() => {
@@ -112,14 +119,19 @@ export function ExpressionEditor({
    return (
       <div
          ref={editorRef}
-         className={'editor' + (solved ? ' solved' : '')}
-         tabIndex={solved ? -1 : 0}
+         className={
+            'editor' + (solved ? ' solved' : revealed ? ' revealed' : '')
+         }
+         tabIndex={locked ? -1 : 0}
          role="textbox"
-         aria-label={'Sua conta: ' + (toText(root) || 'vazia')}
-         aria-readonly={solved}
+         aria-label={
+            (revealed ? 'Uma solução: ' : 'Sua conta: ') +
+            (toText(root) || 'vazia')
+         }
+         aria-readonly={locked}
          onKeyDown={onKeyDown}
          onPointerDown={(e) => {
-            if (solved) return
+            if (locked) return
             const r = e.currentTarget
                .querySelector('.row')!
                .getBoundingClientRect()
@@ -133,20 +145,18 @@ export function ExpressionEditor({
                <MathRow
                   row={root}
                   path={[]}
-                  cursor={solved ? null : cursor}
-                  onPlace={solved ? undefined : onPlace}
+                  cursor={locked ? null : cursor}
+                  onPlace={locked ? undefined : onPlace}
                />
-               {!root.length && (
-                  <span className="hint">Escreva sua conta aqui</span>
-               )}
+               {!root.length && <span className="hint">{placeholder}</span>}
             </div>
          </div>
-         {live?.ok && (solved || showResult) && (
+         {live?.ok && (locked || showResult) && (
             <output className={'value' + (hit || solved ? ' hit' : '')}>
                {formatValue(live.value)}
             </output>
          )}
-         {!solved && (
+         {!locked && (
             <button
                type="button"
                className="reveal"

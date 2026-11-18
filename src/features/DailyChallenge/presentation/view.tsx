@@ -12,6 +12,7 @@ interface DailyChallengeViewProps {
    editorComponent: ReactNode
    statusComponent: ReactNode
    actionsComponent: ReactNode
+   notesComponent: ReactNode
 }
 
 export function DailyChallengeView({
@@ -23,9 +24,10 @@ export function DailyChallengeView({
    editorComponent,
    statusComponent,
    actionsComponent,
+   notesComponent,
 }: DailyChallengeViewProps) {
    return (
-      <Stage level={level}>
+      <Stage level={level} below={notesComponent}>
          {headerComponent}
          {levelTabsComponent}
          <div className="hero">

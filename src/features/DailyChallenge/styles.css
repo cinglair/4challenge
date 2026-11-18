@@ -1,7 +1,9 @@
 /* ── Palco e fundo ─────────────────────────────────────────────── */
 .stage {
    min-height: 100%;
+   min-height: 100dvh; /* acompanha a barra do navegador no celular */
    display: flex;
+   flex-direction: column; /* a tela do jogo e, abaixo dela, o texto */
    background:
       radial-gradient(120% 70% at 50% -10%, var(--bg-2), transparent 65%),
       var(--bg);
@@ -13,13 +15,20 @@
    --action-h: 3.25rem;
    width: min(100%, 31rem);
    margin: 0 auto; /* centrado só na horizontal; o topo fica no topo */
+   flex: none;
    padding: 1rem 1.25rem 1.25rem;
    display: flex;
    flex-direction: column;
+   /* altura da área visível: o que sobra ou falta é absorvido pelo aviso e pelo rodapé */
+   height: 100%;
+   height: 100dvh;
 }
+/* os blocos do jogo entram direto na coluna, para o aviso e o rodapé dividirem o aperto */
 .col > main {
-   display: flex;
-   flex-direction: column;
+   display: contents;
+}
+.col > main > * {
+   flex-shrink: 0;
 }
 .lead {
    margin-top: 1rem;
@@ -29,6 +38,30 @@
 }
 main > .owl {
    margin: 2rem auto 0;
+}
+
+/* ── Texto abaixo da tela do jogo ──────────────────────────────── */
+.below {
+   width: min(100%, 31rem);
+   margin: 0 auto;
+   padding: 1rem 1.25rem 2rem;
+   border-top: 1px solid var(--line);
+}
+.below h2:first-child {
+   margin-top: 1rem;
+}
+.below h3 {
+   margin: 1.25rem 0 0;
+   font: 600 1rem/1.3 var(--ui);
+   color: var(--ink);
+}
+.day-links {
+   display: flex;
+   flex-wrap: wrap;
+   gap: 0.4rem 1.1rem;
+}
+.below .site-nav {
+   margin-top: 0;
 }
 
 /* ── Cabeçalho e níveis ────────────────────────────────────────── */
@@ -288,6 +321,9 @@ main > .owl {
    color: var(--ink);
    border-bottom-color: var(--accent);
 }
+.tick.miss {
+   stroke: var(--muted); /* solução vista: encerrado, mas não resolvido */
+}
 .tick {
    width: 0.9rem;
    height: 0.9rem;
@@ -383,6 +419,10 @@ main > .owl {
    cursor: default;
    border-color: var(--accent);
    background: var(--accent-soft);
+}
+.editor.revealed {
+   cursor: default;
+   border-style: dashed; /* a solução mostrada, não a conta do jogador */
 }
 .scroll {
    flex: 1;
@@ -577,31 +617,30 @@ main > .owl {
    }
 }
 
+.col > main > .status {
+   /* lugar para a dica; em tela baixa encolhe até o tamanho do aviso ou do chip "Dica".
+      O fator alto faz os vãos cederem primeiro: o rodapé só encolhe depois deles. */
+   flex: 0 1000 3.75rem;
+}
 .status {
-   /* altura fixa, com lugar para a dica, para o teclado não sair do lugar */
-   height: 3.75rem;
    margin-top: 0.4rem;
    display: flex;
    align-items: center;
-   justify-content: center;
+   gap: 0.5rem;
    font-size: 0.9375rem;
    line-height: 1.4;
    color: var(--muted);
    text-align: center;
+}
+.status-text {
+   flex: 1;
+   min-width: 0;
 }
 .clue {
    display: inline-flex;
    align-items: center;
    gap: 0.6rem;
    color: var(--ink);
-}
-.clue-label {
-   padding: 0.15rem 0.55rem;
-   border-radius: 999px;
-   background: var(--accent-soft);
-   color: var(--primary);
-   font-size: 0.8125rem;
-   font-weight: 600;
 }
 .clue-expr {
    font: 400 1.1rem/1.2 var(--math);
@@ -661,6 +700,8 @@ main > .owl {
    font-weight: 500;
    color: var(--muted);
    border-radius: 0.9rem;
+   background: var(--key);
+   box-shadow: var(--shadow);
 }
 .link:disabled {
    opacity: 0.4;
@@ -682,16 +723,26 @@ main > .owl {
    transform: scale(0.98);
 }
 .pad .primary {
-   grid-column: span 2;
+   grid-column: span 3;
    padding: 0 0.5rem;
    font-size: 1rem;
 }
+/* chip que liga a dica, ao lado do aviso */
 .clue-toggle {
+   flex: none;
    display: inline-flex;
    align-items: center;
    justify-content: center;
-   gap: 0.35rem;
+   gap: 0.3rem;
+   height: 2rem;
+   padding: 0 0.75rem;
+   border-radius: 999px;
+   background: var(--key);
+   box-shadow: var(--shadow);
    color: var(--primary);
+   font-size: 0.875rem;
+   font-weight: 500;
+   transition: background 0.15s;
 }
 .clue-toggle svg {
    width: 1.15rem;
@@ -708,10 +759,14 @@ main > .owl {
 }
 
 /* ── Resolvido ─────────────────────────────────────────────────── */
+.col > main > .done {
+   /* mesma altura do teclado (3 fileiras + 3 vãos + a fileira de ações) quando há espaço;
+      em tela baixa a sobra debaixo dos botões cede antes de o rodapé encolher */
+   flex: 0 1000 calc(3 * var(--key-h) + 1.75rem + var(--action-h));
+   min-height: min-content;
+}
 .done {
    margin-top: 0.4rem;
-   /* mesma altura do teclado: 3 fileiras + 3 vãos + a fileira de ações */
-   min-height: calc(3 * var(--key-h) + 1.75rem + var(--action-h));
    display: flex;
    flex-direction: column;
    align-items: center;
@@ -830,6 +885,20 @@ main > .owl {
    stroke-linejoin: round;
    display: none;
 }
+/* partes que só aparecem quando ela chora */
+.owl-sob,
+.owl-tear {
+   display: none;
+}
+.owl-sob {
+   fill: none;
+   stroke: var(--ink);
+   stroke-width: 3;
+   stroke-linecap: round;
+}
+.owl-tear {
+   fill: oklch(80% 0.09 235);
+}
 
 /* Parada: respira, pisca, olha para os lados e inclina a cabeça de vez em quando. */
 .owl-figure {
@@ -892,6 +961,62 @@ main > .owl {
    transform: translateY(3px);
 }
 
+/* Pediu a solução: fecha os olhos, soluça e as lágrimas escorrem. */
+.owl[data-mood='cry'] .owl-eye {
+   display: none;
+}
+.owl[data-mood='cry'] .owl-sob,
+.owl[data-mood='cry'] .owl-brow,
+.owl[data-mood='cry'] .owl-tear {
+   display: block;
+}
+.owl[data-mood='cry'] .owl-tilt {
+   animation: none;
+}
+.owl[data-mood='cry'] .owl-figure {
+   animation: owl-sob 1.6s ease-in-out infinite;
+}
+.owl[data-mood='cry'] .owl-wing.left {
+   transform: rotate(4deg);
+}
+.owl[data-mood='cry'] .owl-wing.right {
+   transform: rotate(-4deg);
+}
+.owl[data-mood='cry'] .owl-tear {
+   animation: owl-tear 1.6s ease-in infinite;
+}
+.owl[data-mood='cry'] .owl-tear.right {
+   animation-delay: 0.8s;
+}
+
+@keyframes owl-sob {
+   0%,
+   40%,
+   100% {
+      transform: translateY(0);
+   }
+   10%,
+   26% {
+      transform: translateY(2px) scale(1.01, 0.985);
+   }
+   18% {
+      transform: translateY(0.5px);
+   }
+}
+@keyframes owl-tear {
+   0% {
+      transform: translateY(0) scale(0.4);
+      opacity: 0;
+   }
+   20% {
+      transform: translateY(2px) scale(1);
+      opacity: 1;
+   }
+   100% {
+      transform: translateY(30px) scale(1);
+      opacity: 0;
+   }
+}
 @keyframes owl-breathe {
    50% {
       transform: scale(1.015, 0.975);
@@ -972,25 +1097,34 @@ main > .owl {
 
 /* ── Rodapé "sobre" ────────────────────────────────────────────── */
 .about {
+   /* encolhe até a metade quando falta altura; logo e texto acompanham em escala (cqh) */
+   --about-h: 5.85rem;
+   flex: 0 1 var(--about-h);
+   min-height: calc(var(--about-h) / 2);
    margin-top: auto; /* gruda no fim da tela quando sobra espaço */
-   padding-top: 2rem;
+   container-type: size;
    display: flex;
    flex-direction: column;
    align-items: center;
-   gap: 0.35rem;
+   justify-content: flex-end;
    text-align: center;
-   font-size: 0.8125rem;
-   line-height: 1.5;
    color: var(--muted);
 }
 .about img {
-   width: min(8.5rem, 45%);
-   height: auto;
+   height: 39cqh;
+   width: auto;
+   max-width: 100%;
+   object-fit: contain;
    opacity: 0.85;
+}
+.about p {
+   margin-top: 6cqh;
+   font-size: 13.9cqh;
+   line-height: 1.5;
 }
 
 /* ── Telas baixas: tudo um pouco mais compacto para caber sem rolar ── */
-@media (max-height: 720px) {
+@media (max-height: 760px) {
    .col {
       --key-h: 2.6rem;
       --action-h: 2.85rem;
@@ -1026,6 +1160,35 @@ main > .owl {
    .editor {
       min-height: 4.6rem;
       font-size: 1.9rem;
+   }
+}
+
+/* ── Telas muito baixas (celular pequeno com a barra do navegador à mostra) ── */
+@media (max-height: 650px) {
+   .col {
+      --key-h: 2.3rem;
+      --action-h: 2.6rem;
+      padding-top: 0.4rem;
+      padding-bottom: 0.5rem;
+   }
+   .level {
+      min-height: 36px;
+   }
+   .hero {
+      margin-top: 0.4rem;
+   }
+   .target {
+      font-size: 2.8rem;
+   }
+   .tile {
+      width: 1.6rem;
+      height: 1.8rem;
+      font-size: 1rem;
+   }
+   .editor {
+      margin-top: 0.6rem;
+      min-height: 4.1rem;
+      font-size: 1.7rem;
    }
 }
 

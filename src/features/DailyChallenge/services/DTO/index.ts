@@ -13,3 +13,8 @@ export interface DailyPuzzleDTO {
 export interface PuzzleHintDTO {
    hint: Row
 }
+
+/** Uma solução possível do desafio; `null` nos desafios antigos, ainda sem ela. */
+export interface PuzzleSolutionDTO {
+   solution: Row | null
+}

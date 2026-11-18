@@ -46,6 +46,37 @@ export function SolvedPanel({
    )
 }
 
+interface RevealedPanelProps {
+   /** A contagem para os novos desafios só faz sentido no dia de hoje. */
+   showCountdown: boolean
+   nextLevelLabel?: string
+   onNextLevel: () => void
+}
+
+/** O jogador pediu a solução: o nível termina sem contar como resolvido. */
+export function RevealedPanel({
+   showCountdown,
+   nextLevelLabel,
+   onNextLevel,
+}: RevealedPanelProps) {
+   return (
+      <section className="done">
+         <h2>Não foi desta vez</h2>
+         <p>Esta é uma das soluções possíveis.</p>
+         {!nextLevelLabel && showCountdown && (
+            <p>
+               <Countdown />
+            </p>
+         )}
+         {nextLevelLabel && (
+            <button className="primary" onClick={onNextLevel}>
+               Jogar o {nextLevelLabel}
+            </button>
+         )}
+      </section>
+   )
+}
+
 type ShareStatus = 'idle' | 'copied' | 'failed'
 
 const SHARE_LABEL: Record<ShareStatus, string> = {

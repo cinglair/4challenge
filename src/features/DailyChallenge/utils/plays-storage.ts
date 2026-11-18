@@ -1,6 +1,7 @@
 import type { Plays } from '../types'
 
-/* Progresso do dia guardado no navegador, inclusive se a dica foi pedida. */
+/* Progresso do dia guardado no navegador, inclusive se a dica ou a solução foi pedida
+   (`revealed`: o nível fica encerrado como não resolvido). */
 
 export const emptyPlays = (): Plays => ({
    easy: { root: [], solved: false, tries: 0, hinted: false },

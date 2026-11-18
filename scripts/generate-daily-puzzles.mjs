@@ -9,7 +9,9 @@
  *   medium — exige potência ou raiz, com uma conta ainda curta
  *   hard   — a conta é trabalhosa; na maioria dos dias o fatorial é só mais um
  *            caminho possível; nos outros, ele é necessário
- * A dica (o começo de uma solução) vai junto, na coluna `hint`.
+ * A dica (o começo de uma solução) vai junto, na coluna `hint`, e a solução
+ * inteira na coluna `solution`. Rodar o SQL de novo sobre dias que já existem
+ * só (re)preenche a solução.
  * Nenhum trio (alvo, algarismo, quantidade) se repete dentro de um nível.
  * O sorteio tem semente fixa: o mesmo intervalo gera sempre o mesmo SQL.
  */
@@ -120,6 +122,7 @@ for (const level of LEVELS) {
             ;(groups[found.group] ??= []).push({
                ...puzzle,
                hint: maskSolution(found.row),
+               solution: found.row,
             })
          }
    pools[level] = groups
@@ -158,16 +161,16 @@ for (const date of days) {
       if (!p) throw new Error(`faltou desafio ${level} para ${date}`)
       lastDigit[level] = p.digit
       today.add(p.digit)
-      const hint = JSON.stringify(p.hint).replaceAll("'", "''")
+      const json = (row) => JSON.stringify(row).replaceAll("'", "''")
       rows.push(
-         `('${date}','${level}',${p.target},${p.digit},${p.count},'${hint}')`
+         `('${date}','${level}',${p.target},${p.digit},${p.count},'${json(p.hint)}','${json(p.solution)}')`
       )
    }
 }
 
 console.log(
-   'insert into public.daily_puzzles (date, level, target, digit, count, hint) values\n' +
+   'insert into public.daily_puzzles (date, level, target, digit, count, hint, solution) values\n' +
       rows.join(',\n') +
-      '\non conflict (date, level) do nothing;'
+      '\non conflict (date, level) do update set solution = excluded.solution;'
 )
 console.error(`${days.length} dias, ${rows.length} desafios`)

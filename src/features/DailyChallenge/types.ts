@@ -56,6 +56,8 @@ export interface Play {
    hinted: boolean
    /** O jogador já pediu a dica deste nível (não volta a ser falso). */
    usedHint?: boolean
+   /** O jogador pediu a solução: o nível fica encerrado, sem contar como resolvido. */
+   revealed?: boolean
 }
 export type Plays = Record<Level, Play>
 
@@ -78,6 +80,7 @@ export type GameAction =
    | { type: 'level'; level: Level }
    | { type: 'place'; cursor: Cursor }
    | { type: 'hint' }
+   | { type: 'reveal' }
    | { type: 'key'; key: Key; puzzle: Puzzle }
    | { type: 'wrongDigit'; puzzle: Puzzle }
 

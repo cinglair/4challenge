@@ -1,9 +1,7 @@
-import { parseISODate } from '@/src/shared'
+import { SITE_URL, parseISODate } from '@/src/shared'
 
 import type { Level } from '../services/models'
 import { LEVELS } from './constants'
-
-export const SITE_URL = 'https://algarism.io'
 
 /**
  * Mensagem para compartilhar um acerto. Diz o nível e o dia, nunca a conta:

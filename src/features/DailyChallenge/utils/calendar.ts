@@ -1,6 +1,7 @@
 import { localISODate, parseISODate } from '@/src/shared'
 
 import type { Plays } from '../types'
+import { FIRST_PUZZLE_DATE } from './constants'
 
 /** Um mês do calendário; `month` vai de 0 (janeiro) a 11. */
 export interface MonthRef {
@@ -59,3 +60,7 @@ export function dayProgress(plays: Plays | null): DayProgress {
    if (solved === 0) return 'none'
    return solved === Object.keys(plays).length ? 'done' : 'partial'
 }
+
+/** O dia tem desafio liberado: do primeiro dia do banco até hoje. */
+export const isPlayableDate = (date: string, today: string) =>
+   date >= FIRST_PUZZLE_DATE && date <= today
