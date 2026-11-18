@@ -253,7 +253,7 @@ if (!SEO_BLOCK.test(template) || !template.includes(ROOT))
 
 function head({ path, title, description, jsonLd = [] }) {
    const url = SITE_URL + path
-   const image = SITE_URL + '/og.png'
+   const image = SITE_URL + '/og-card.png'
    return [
       `<title>${esc(title)}</title>`,
       `<meta name="description" content="${esc(description)}" />`,
@@ -265,9 +265,9 @@ function head({ path, title, description, jsonLd = [] }) {
       `<meta property="og:description" content="${esc(description)}" />`,
       `<meta property="og:url" content="${esc(url)}" />`,
       `<meta property="og:image" content="${image}" />`,
-      `<meta property="og:image:width" content="1200" />`,
-      `<meta property="og:image:height" content="630" />`,
-      `<meta name="twitter:card" content="summary_large_image" />`,
+      `<meta property="og:image:width" content="600" />`,
+      `<meta property="og:image:height" content="600" />`,
+      `<meta name="twitter:card" content="summary" />`,
       `<meta name="twitter:title" content="${esc(title)}" />`,
       `<meta name="twitter:description" content="${esc(description)}" />`,
       `<meta name="twitter:image" content="${image}" />`,
