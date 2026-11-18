@@ -14,7 +14,6 @@ import {
 import {
    ChallengeBrief,
    ChallengeHeader,
-   ChallengeNotes,
    ExpressionEditor,
    Keypad,
    LevelTabs,
@@ -128,11 +127,10 @@ function ChallengeSession({
          onDateChange={onDateChange}
       />
    )
-   const notes = <ChallengeNotes date={date} today={today} puzzles={puzzles} />
 
    if (isError) {
       return (
-         <Stage level={game.level} below={notes}>
+         <Stage level={game.level}>
             {header}
             <OwlMascot mood="oops" />
             <p className="lead">
@@ -145,7 +143,7 @@ function ChallengeSession({
 
    if (!puzzle) {
       return (
-         <Stage level={game.level} below={notes}>
+         <Stage level={game.level}>
             {header}
             <OwlMascot />
             <p className="lead" role="status">
@@ -171,7 +169,6 @@ function ChallengeSession({
    return (
       <DailyChallengeView
          level={game.level}
-         notesComponent={notes}
          headerComponent={header}
          levelTabsComponent={
             <LevelTabs

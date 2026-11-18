@@ -40,7 +40,7 @@ main > .owl {
    margin: 2rem auto 0;
 }
 
-/* ── Texto abaixo da tela do jogo ──────────────────────────────── */
+/* ── Texto abaixo da tela do jogo (só no HTML pré-renderizado, para os buscadores) ──────────────────────────────── */
 .below {
    width: min(100%, 31rem);
    margin: 0 auto;
@@ -1097,12 +1097,12 @@ main > .owl {
 
 /* ── Rodapé "sobre" ────────────────────────────────────────────── */
 .about {
-   /* encolhe até a metade quando falta altura; logo e texto acompanham em escala (cqh) */
-   --about-h: 5.85rem;
-   flex: 0 1 var(--about-h);
-   min-height: calc(var(--about-h) / 2);
+   /* o respiro acima do texto some quando falta altura */
+   flex: 0 1 4rem;
+   min-height: 2.4rem;
    margin-top: auto; /* gruda no fim da tela quando sobra espaço */
-   container-type: size;
+   font-size: 0.8125rem;
+   line-height: 1.4;
    display: flex;
    flex-direction: column;
    align-items: center;
@@ -1110,17 +1110,19 @@ main > .owl {
    text-align: center;
    color: var(--muted);
 }
-.about img {
-   height: 39cqh;
-   width: auto;
-   max-width: 100%;
-   object-fit: contain;
-   opacity: 0.85;
+.about nav {
+   margin-top: 0.1rem;
+   display: flex;
+   gap: 1.1rem;
 }
-.about p {
-   margin-top: 6cqh;
-   font-size: 13.9cqh;
-   line-height: 1.5;
+.about a {
+   color: inherit;
+   text-decoration: underline;
+   text-decoration-color: var(--line);
+   text-underline-offset: 0.2em;
+}
+.about a:hover {
+   color: var(--primary);
 }
 
 /* ── Telas baixas: tudo um pouco mais compacto para caber sem rolar ── */
